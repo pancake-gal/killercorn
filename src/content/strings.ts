@@ -63,6 +63,10 @@ export const STRINGS = {
   bossOpen: 'Dizzy! Hit it now!',
   bossBlocked: 'Blocked! Wait for the stars.',
   pitHint: 'Hold jump for a bigger jump!',
+  // The barn stays shut until the caged friend is free (UX review #7): said at the door itself.
+  lockedDoor: 'Free your friend first!',
+  // The stage score card waits for this press (UX review #9) instead of rushing on.
+  keepGoing: 'Keep Going',
   // Portrait phones shrink play to a sliver; asked before the run starts, never blocking it.
   rotateHint: 'Turn your phone sideways for a bigger view',
   // Home-screen shortcut: the title link and the how-to card for browsers with no install dialog.
@@ -103,6 +107,11 @@ export const ROYALE_BOSS_NAME: Record<string, string> = {
 // A ring group's display names ("Butter Stick", "Salt & Pepper").
 export function royaleNames(ids: readonly string[]): string {
   return ids.map((id) => ROYALE_BOSS_NAME[id] ?? id).join(' & ');
+}
+
+// A field's first objective, shown as it opens (UX review #7): free the caged friend, then the barn.
+export function objectiveText(friend: string): string {
+  return `Free ${friend.charAt(0).toUpperCase()}${friend.slice(1)}, then run to the barn!`;
 }
 
 // The drop-in banner for a group entering the ring.

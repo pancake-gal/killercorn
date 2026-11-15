@@ -27,6 +27,11 @@ export interface PlayerConfig {
 
 export const MAX_HEALTH = 3;
 export const INVISIBILITY_FRAMES = 30 * 60;
+// Berry Rush: a level dash at this speed for the first frames of its cooldown (UX review #11; the
+// one-frame 8.6 flick it replaces added about 4 px).
+const BERRY_DASH_SPEED = 9;
+const BERRY_DASH_FRAMES = 8;
+const BERRY_DASH_COOLDOWN = 12;
 
 // Fred's feel. Every field is a knob the build-path's "jump-feel tunable" gate exercises.
 export const FRED_CONFIG: PlayerConfig = {
@@ -174,12 +179,17 @@ export function playerStep(state: PlayerState, input: InputFrame, cfg: PlayerCon
 
   let powerCharges = state.powerCharges;
   let powerCooldown = Math.max(0, state.powerCooldown - 1);
+  // Berry Rush keeps dashing for the first BERRY_DASH_FRAMES of its cooldown while still moving the way
+  // the kid faces (a wall or a knockback ends it), so one press carries the kid instead of a flick.
+  let dashing = state.power === 'berryRush'
+    && powerCooldown > BERRY_DASH_COOLDOWN - BERRY_DASH_FRAMES
+    && Math.sign(state.vx) === facing;
   const pressedPower = input.power === true && !state.powerHeld;
   if (pressedPower && powerCooldown === 0 && powerCharges > 0) {
     if (state.power === 'berryRush') {
-      vx = facing * 8.6;
+      dashing = true;
       powerCharges -= 1;
-      powerCooldown = 12;
+      powerCooldown = BERRY_DASH_COOLDOWN;
     } else if (state.power === 'blueBounce' && !state.onGround) {
       vy = -14.5;
       powerCharges -= 1;
@@ -190,8 +200,13 @@ export function playerStep(state: PlayerState, input: InputFrame, cfg: PlayerCon
     }
   }
 
-  // Gravity, clamped to terminal velocity.
-  vy = Math.min(vy + ecfg.gravity, ecfg.maxFall);
+  if (dashing) {
+    vx = facing * BERRY_DASH_SPEED;
+    vy = 0; // a level dash: no sag, so it can carry a kid across a gap
+  } else {
+    // Gravity, clamped to terminal velocity.
+    vy = Math.min(vy + ecfg.gravity, ecfg.maxFall);
+  }
 
   const moved = moveAabb({ x: state.x, y: state.y, w: ecfg.width, h: ecfg.height }, vx, vy, level);
 

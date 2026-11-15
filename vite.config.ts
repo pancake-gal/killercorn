@@ -5,7 +5,7 @@ import { readFileSync, createReadStream } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import type { Plugin } from 'vite';
 // @ts-ignore project-owned plain ESM helper shared with the packaging test
-import { runtimeAssetPaths } from './scripts/runtime-assets.mjs';
+import { runtimeAssetPaths, hashedRuntimeAssets, rewriteAssetPaths } from './scripts/runtime-assets.mjs';
 
 const ROOT = fileURLToPath(new URL('.', import.meta.url));
 const ASSET_MANIFEST = JSON.parse(readFileSync(resolve(ROOT, 'assets/manifest.json'), 'utf8'));
@@ -28,8 +28,21 @@ const MIME: Record<string, string> = {
 
 function runtimeAssetsPlugin(): Plugin {
   const allowed = new Set(RUNTIME_ASSETS);
+  // Served name per runtime path. Builds content-hash art and audio so the host can cache them
+  // immutably (GO-LIVE-PUBLICATION host configuration); dev keeps the plain paths.
+  let served: Map<string, string> = new Map(RUNTIME_ASSETS.map((path) => [path, path]));
   return {
     name: 'killercorn-runtime-assets',
+    enforce: 'pre',
+    configResolved(config) {
+      if (config.command === 'build') {
+        served = hashedRuntimeAssets(RUNTIME_ASSETS, (path: string) => readFileSync(resolve(ROOT, path)));
+      }
+    },
+    transform(code, id) {
+      if (!/\/assets\/(audio\/)?manifest\.json$/.test(id.split('?')[0])) return null;
+      return { code: rewriteAssetPaths(code, served), map: null };
+    },
     configureServer(server) {
       server.middlewares.use((request, response, next) => {
         const pathname = decodeURIComponent(new URL(request.url ?? '/', 'http://local').pathname).replace(/^\/+/, '');
@@ -42,7 +55,7 @@ function runtimeAssetsPlugin(): Plugin {
     },
     buildStart() {
       for (const fileName of RUNTIME_ASSETS) {
-        this.emitFile({ type: 'asset', fileName, source: readFileSync(resolve(ROOT, fileName)) });
+        this.emitFile({ type: 'asset', fileName: served.get(fileName) ?? fileName, source: readFileSync(resolve(ROOT, fileName)) });
       }
       this.emitFile({ type: 'asset', fileName: APP_MANIFEST_FILE, source: readFileSync(resolve(ROOT, APP_MANIFEST_SOURCE)) });
     },

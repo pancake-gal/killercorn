@@ -23,8 +23,8 @@ export function serializeSettings(value: GameSettings): string {
   return JSON.stringify(value);
 }
 
-export function parseSettings(json: string | null): GameSettings {
-  if (!json) return { ...DEFAULT_SETTINGS };
+export function parseSettings(json: string | null, fallback: GameSettings = DEFAULT_SETTINGS): GameSettings {
+  if (!json) return { ...fallback };
   try {
     const value = JSON.parse(json) as Partial<GameSettings>;
     if (
@@ -33,10 +33,10 @@ export function parseSettings(json: string | null): GameSettings {
       typeof value.highContrast !== 'boolean' ||
       (value.textScale !== 'normal' && value.textScale !== 'large') ||
       typeof value.visualCues !== 'boolean'
-    ) return { ...DEFAULT_SETTINGS };
+    ) return { ...fallback };
     return value as GameSettings;
   } catch {
-    return { ...DEFAULT_SETTINGS };
+    return { ...fallback };
   }
 }
 
@@ -47,8 +47,17 @@ export function applySettings(value: GameSettings, root: HTMLElement = document.
   root.dataset.visualCues = String(value.visualCues);
 }
 
-export function loadSettings(storage: Pick<Storage, 'getItem'> | null = safeStorage()): GameSettings {
-  return parseSettings(readStorage(storage, SETTINGS_KEY));
+// Until the player saves a choice, reduced motion follows the device's "reduce motion" preference.
+export function loadSettings(
+  storage: Pick<Storage, 'getItem'> | null = safeStorage(),
+  prefersReducedMotion: boolean = osPrefersReducedMotion(),
+): GameSettings {
+  return parseSettings(readStorage(storage, SETTINGS_KEY), { ...DEFAULT_SETTINGS, reducedMotion: prefersReducedMotion });
+}
+
+function osPrefersReducedMotion(): boolean {
+  return typeof window !== 'undefined' && typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 export function saveSettings(value: GameSettings, storage: Pick<Storage, 'setItem'> | null = safeStorage()): void {

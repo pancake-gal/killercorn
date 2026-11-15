@@ -194,12 +194,14 @@ export function resolveRoyale(
   let damaged = false;
   let anyHit = false;
   let popped = false;
+  let hitX: number | undefined;
   const members = team.members.map((m, i) => {
     if (!royaleActive(team, i)) return m;
     const r = resolveBoss(player, m, pCfg, configs[i]!);
     if (r.bounced) bounced = true;
     if (r.damaged) damaged = true;
     if (r.hit) anyHit = true;
+    hitX ??= r.hitX;
     if (r.boss.hp <= 0) popped = true;
     return r.boss;
   });
@@ -216,7 +218,7 @@ export function resolveRoyale(
         ],
       }
     : team.royale!;
-  return { teamBoss: { members, royale }, bounced, hit, damaged };
+  return { teamBoss: { members, royale }, bounced, hit, damaged, ...(hit && hitX !== undefined ? { hitX } : {}) };
 }
 
 // True when a power refill would change something: a spent charge, a running cooldown, or a fallen

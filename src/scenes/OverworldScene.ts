@@ -7,7 +7,7 @@ import { applyRegime } from '@/regime/derive';
 import { regimeCanvas } from '@/regime/canvas';
 import { STRINGS } from '@/content/strings';
 import { Rng } from '@/core/rng';
-import { getEntity } from '@/entities/index';
+import { CHARACTER_ROSTER } from '@/entities/player/characters';
 import { SCENE } from './keys';
 
 const RUN_SEED = 0x0c0ffee5; // placeholder run seed; real runs derive this from the save/replay.
@@ -28,8 +28,8 @@ export class OverworldScene extends Phaser.Scene {
     // Ground strip.
     this.add.rectangle(width / 2, height - 40, width, 80, c.accentInt, 1);
 
-    // Hero stand-in (Fred) — pulled from the entity registry so the roster is the source.
-    const fred = getEntity('playerCharacter.fred');
+    // Hero stand-in (Fred) — named from the character roster, the one source for the kids.
+    const fred = CHARACTER_ROSTER.find((kid) => kid.id === 'fred');
     this.add.rectangle(width * 0.2, height - 110, 40, 60, c.accentInt, 1);
     this.add
       .text(width * 0.2, height - 160, fred?.title ?? 'Fred', { fontFamily: 'system-ui, sans-serif', fontSize: '16px', color: c.text })

@@ -46,6 +46,7 @@ export function projectileStep(state: ProjectileState, cfg: ProjectileConfig, le
 export interface ProjectileResolution {
   projectiles: ProjectileState[];
   hit: boolean; // a live projectile struck the player this frame (the stepper turns this into a respawn)
+  hitX?: number; // centre x of the first shot that struck (the knockback pushes away from it)
 }
 
 // Resolve one frame of projectile ↔ player contact. A live projectile overlapping the player box
@@ -58,14 +59,16 @@ export function resolveProjectiles(
 ): ProjectileResolution {
   const pBox: Aabb = { x: player.x, y: player.y, w: pCfg.width, h: pCfg.height };
   let hit = false;
+  let hitX: number | undefined;
   const out = projectiles.map((pr) => {
     if (!pr.alive) return pr;
     const box: Aabb = { x: pr.x, y: pr.y, w: cfg.width, h: cfg.height };
     if (aabbOverlap(pBox, box)) {
       hit = true;
+      hitX ??= box.x + box.w / 2;
       return { ...pr, alive: false };
     }
     return pr;
   });
-  return { projectiles: out, hit };
+  return { projectiles: out, hit, ...(hitX !== undefined ? { hitX } : {}) };
 }

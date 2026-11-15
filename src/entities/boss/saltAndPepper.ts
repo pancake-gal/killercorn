@@ -71,6 +71,7 @@ export interface TeamBossCombatResult {
   bounced: boolean; // the player stomped any shaker this frame (apply the stomp bounce)
   hit: boolean; // a shaker's body hurt the player this frame (respawn) — suppressed on an attack frame
   damaged: boolean; // any shaker lost a pip this frame
+  hitX?: number; // centre x of the first shaker whose body hurt (the knockback pushes away from it)
 }
 
 // Resolve player ↔ team combat: each shaker runs the single-boss combat rule. A stomp/swing on a
@@ -86,15 +87,17 @@ export function resolveTeamBoss(
   let bounced = false;
   let damaged = false;
   let anyHit = false;
+  let hitX: number | undefined;
   const members = state.members.map((m, i) => {
     const r = resolveBoss(player, m, pCfg, configs[i]!);
     if (r.bounced) bounced = true;
     if (r.damaged) damaged = true;
     if (r.hit) anyHit = true;
+    hitX ??= r.hitX;
     return r.boss;
   });
   const hit = anyHit && !bounced && !damaged;
-  return { teamBoss: { members }, bounced, hit, damaged };
+  return { teamBoss: { members }, bounced, hit, damaged, ...(hit && hitX !== undefined ? { hitX } : {}) };
 }
 
 // The team is down when every shaker is popped (the arena's win condition; a popped team is terminal).

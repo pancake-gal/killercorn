@@ -27,13 +27,27 @@ import { ALLY_CONFIG } from '@/entities/ally/produce';
 import { PEEL_CONFIG } from '@/entities/projectile/peel';
 import { assetPath } from '@/assets/resolve';
 import { artSetFor, gameplayAssetIdsFor, playerArtPrefix, type LevelArtSet } from './artset';
-import { activePhase, bossRecoveryFramesFor, type BossState, type BossConfig } from '@/entities/boss/kingCorn';
+import { activePhase, attackProfileFor, bossRecoveryFramesFor, type BossState, type BossConfig } from '@/entities/boss/kingCorn';
 import { nextLevel } from '@/campaign/definition';
 import { installVisibilityPause } from './autopause';
 import { AudioBus } from '@/audio/AudioBus';
 import { sfxForTransition } from '@/audio/events';
 import { fxForTransition, powerUseFx, type FxEvent } from '@/render/fx';
 import { anyBossRecovering, bossOpen, bossTellsForTransition, throwCueText, type BossTell } from '@/render/bossTells';
+import { bossBlinkAlpha, calmFinaleKeyframe, hurtFlashFill, invulnAlpha, rageLook } from '@/render/motion';
+import {
+  bossWindupLook,
+  hitStopFor,
+  kidDisplayScale,
+  koPhase,
+  latchPresses,
+  lockedDoorTouched,
+  objectiveCue,
+  mergeLatched,
+  MID_LAYER_MUTE,
+  mutedTint,
+  type LatchedPresses,
+} from '@/render/feel';
 import { royaleBodyAlpha, royaleEntrants, royaleHudRow, royaleNextUp } from '@/render/royale';
 import { lostTryToPit } from '@/render/pitHint';
 import { powerConfig } from '@/entities/player/powerup';
@@ -114,6 +128,14 @@ const HURT_TINT_FRAMES = 6; // white flash-fill on the player after a hit
 const HURT_POSE_FRAMES = 14; // hold the hurt pose (item 5) after a hit
 const JUICE_FRAMES = 6; // player squash / stretch latch length
 const ENEMY_SQUISH_FRAMES = 8; // scaleY x0.5 KO pop on a felled enemy
+const VICTIM_FLASH_FRAMES = 2; // a felled enemy flashes the regime glow this long (UX review #10)
+// The stage score card (UX review #9): a beat before it covers the pop, a minimum before a press counts,
+// and the point it moves on by itself.
+const ENDING_HOLD_MS = 1_100;
+const CARD_MIN_MS = 1_500;
+const CARD_AUTO_MS = 6_000;
+// The game-over card waits for the tumble to read before covering it.
+const GAME_OVER_HOLD_MS = 900;
 // Crew-power ghost trail: drop a fading copy of the hero every few frames for a short window.
 const TRAIL_FRAMES = 12;
 const TRAIL_EVERY = 4;
@@ -252,6 +274,13 @@ export class PlayScene extends Phaser.Scene {
   private stretchTimer = 0; // jump stretch latch
   private squashTimer = 0; // land squash latch
   private enemySquish: number[] = []; // per-enemy KO scaleY latch
+  private enemyKoFrame: (number | undefined)[] = []; // world frame each enemy was felled (dizzy → poof → gone)
+  private enemyFlash: number[] = []; // per-enemy victim flash frames on a kill
+  private hitStop = 0; // frames left in a hit-stop freeze (the sim step is skipped, like a pause)
+  private advanceStage: (() => void) | undefined; // moves on past the held score card (once)
+  private cardShownAt = 0; // scene time the score card appeared
+  private nextPressHeld = false; // jump/swing held on the last card frame (a press needs a release first)
+  private latchedPresses: LatchedPresses | undefined; // presses seen during a freeze, fed to the next sim frame
   private hurtTintColor = 0xffffff; // regime glow int for the hit flash, resolved in create()
   private shakeFrames = 0; // frames of screen shake left (deterministic, frame-derived)
   private shakeDur = 1; // the shake's full duration, for the decay ramp
@@ -359,6 +388,13 @@ export class PlayScene extends Phaser.Scene {
     this.stretchTimer = 0;
     this.squashTimer = 0;
     this.enemySquish = [];
+    this.enemyKoFrame = [];
+    this.enemyFlash = [];
+    this.hitStop = 0;
+    this.latchedPresses = undefined;
+    this.advanceStage = undefined;
+    this.cardShownAt = 0;
+    this.nextPressHeld = false;
     this.shakeFrames = 0;
     this.shakeMag = 0;
     this.camLookahead = 0;
@@ -450,7 +486,7 @@ export class PlayScene extends Phaser.Scene {
     // hour/weather (boss arenas = storm), from the shared World-1 art. Presentation-only art data.
     const grade = this.art.grade;
     this.bgFar.setTint(grade.far);
-    this.bgMid.setTint(grade.mid);
+    this.bgMid.setTint(mutedTint(grade.mid, MID_LAYER_MUTE)); // scenery cobs recede behind real ones
     this.bgNear.setTint(grade.near);
     if (grade.camBg) this.cameras.main.setBackgroundColor(grade.camBg);
 
@@ -660,6 +696,8 @@ export class PlayScene extends Phaser.Scene {
     this.enemyPrevDir = this.world.enemies.map((e) => e.dir);
     this.enemyTurnTimer = this.world.enemies.map(() => 0);
     this.enemySquish = this.world.enemies.map(() => 0);
+    this.enemyKoFrame = this.world.enemies.map(() => undefined);
+    this.enemyFlash = this.world.enemies.map(() => 0);
 
     this.cameras.main.startFollow(this.playerSprite, true, 0.12, 0.12);
     this.cameras.main.setFollowOffset(0, 0); // reset the lookahead/shake channel (item 7; scene reused)
@@ -830,6 +868,7 @@ export class PlayScene extends Phaser.Scene {
       else if (i.type === 'select-power') this.equipCrewPower(i.power);
       else if (i.type === 'restart-stage') this.restartStage(false);
       else if (i.type === 'retry') this.restartStage(true);
+      else if (i.type === 'next-stage') this.requestNextStage();
       else if (i.type === 'quit-title') this.quitToTitle();
       else if (i.type === 'royale-again' && this.royale) this.restartStage(false); // Mash Again: a fresh run
       else if (i.type === 'switch-character' && this.canSwitchCharacters && !this.paused && !this.transitioning && !this.gameOverShown) {
@@ -860,6 +899,10 @@ export class PlayScene extends Phaser.Scene {
     // Publish gameplay chrome only after every intent listener is installed. On a slower phone,
     // exposing Pause earlier created a real race where the first tap was delivered to nobody.
     this.publishCampaign();
+    // A field with a caged friend opens on its objective (UX review #7). Not a sound caption, so it
+    // shows whatever the visual-cue setting says.
+    const objective = this.royale ? undefined : objectiveCue(this.level);
+    if (objective) snapshot.set({ ...snapshot.get(), visualCue: { id: this.world.frame, text: objective } });
   }
 
   private setPaused(paused: boolean): void {
@@ -1018,6 +1061,15 @@ export class PlayScene extends Phaser.Scene {
   }
 
   private bossHopRageJuice(sprite: Phaser.GameObjects.Sprite, b: BossState, bc: BossConfig, frame: number, rage: boolean): void {
+    // Per-attack wind-up silhouette (plan §0 item 4): a lob leans back, a dash crouches, a slam rears up,
+    // so the three tells no longer share one pose. The hop keeps its coil below.
+    const windup = bossWindupLook(b, attackProfileFor(activePhase(b, bc), b.attack).windupFrames);
+    if (windup) {
+      sprite.scaleX *= windup.scaleX;
+      sprite.scaleY *= windup.scaleY;
+      sprite.y += windup.dy;
+    }
+    sprite.setRotation(windup ? windup.angle : 0);
     if (b.attack === 'hop') {
       const ph = activePhase(b, bc);
       if (b.mode === 'windup') {
@@ -1036,9 +1088,10 @@ export class PlayScene extends Phaser.Scene {
       }
     }
     if (rage) {
-      if (frame % 16 < 6) sprite.setTint(this.hurtTintColor);
+      const look = rageLook(frame, this.reducedMotion); // pulse + ±3px tremble, or a steady tint
+      if (look.tinted) sprite.setTint(this.hurtTintColor);
       else sprite.clearTint();
-      sprite.x += (Math.floor(frame / 2) % 2 === 0 ? 1 : -1) * 3; // ±3px display tremble (every 2 frames)
+      sprite.x += look.dx;
     } else {
       sprite.clearTint();
     }
@@ -1079,12 +1132,10 @@ export class PlayScene extends Phaser.Scene {
     return !!team && !!m && !!cfg && m.hp > 0 && (!team.royale || inRoyaleRing(team, i)) && activePhase(m, cfg).rage === true;
   }
 
-  // Telegraph blink: flash while flashing from a hit OR while winding up an attack (the tell).
-  private bossBlink(b: BossState): boolean {
-    if (b.hp <= 0) return false;
-    if (b.hitCooldown > 0) return b.hitCooldown % 8 < 4;
-    if (b.mode === 'windup') return b.modeTimer % 8 < 4;
-    return false;
+  // Reduced motion (Settings or the OS default) swaps every canvas flash, blink and tremble for a
+  // steady stand-in (src/render/motion.ts).
+  private get reducedMotion(): boolean {
+    return document.documentElement.dataset.reducedMotion === 'true';
   }
 
   private showBossCard(cardId: string): void {
@@ -1136,8 +1187,11 @@ export class PlayScene extends Phaser.Scene {
         break;
       case 'squish': {
         this.enemySquish[ev.i] = ENEMY_SQUISH_FRAMES;
+        this.enemyKoFrame[ev.i] = this.world.frame;
+        this.enemyFlash[ev.i] = VICTIM_FLASH_FRAMES;
         const dims = this.world.enemies[ev.i]?.kind === 'squirrel' ? SQUIRREL_CONFIG : KERNEL_CREEP_CONFIG;
         this.spawnDust(ev.x + dims.width / 2, ev.y + dims.height, 1);
+        this.spawnSparkles(ev.x + dims.width / 2, ev.y + dims.height / 2, COLLECT_PATTERN); // contact spark
         break;
       }
       case 'collect':
@@ -1148,10 +1202,34 @@ export class PlayScene extends Phaser.Scene {
         this.shake(...SHAKE_BOX);
         this.spawnDust(ev.x + WHEAT_BOX_CONFIG.width / 2, ev.y + WHEAT_BOX_CONFIG.height, 2);
         break;
-      case 'boss-hit':
+      case 'boss-hit': {
         this.shake(...SHAKE_BOSS_HIT);
         this.popBossPip(ev.member);
+        // Contact spark on the boss body (the hit-stop freezes on it).
+        const hitBoss = ev.member < 0 ? this.world.boss : this.world.teamBoss?.members[ev.member];
+        const hitCfg = ev.member < 0 ? this.art.boss?.config : this.art.teamBoss?.members[ev.member]?.config;
+        if (hitBoss && hitCfg) this.spawnSparkles(hitBoss.x + hitCfg.width / 2, hitBoss.y + hitCfg.height / 3, RING_PATTERN);
         break;
+      }
+      case 'checkpoint': {
+        // The scarecrow armed: a sparkle ring on its marker (it used to arm silently).
+        const cp = this.level.checkpoints[ev.i];
+        if (cp) this.spawnSparkles(cp.respawn.x + this.cfg.player.width / 2, cp.y + cp.h - 70, RING_PATTERN);
+        break;
+      }
+      case 'shield-block':
+        // The leaf soaked a hit: a ring at the kid instead of a silent knockback.
+        this.spawnSparkles(ev.x + this.cfg.player.width / 2, ev.y + this.cfg.player.height / 2, RING_PATTERN);
+        this.pulse(this.powerPortrait);
+        break;
+      case 'respawn': {
+        // Back at the checkpoint: snap the camera there behind a poof, instead of an ~850 px whip-pan.
+        const cam = this.cameras.main;
+        cam.centerOn(ev.x + this.cfg.player.width / 2, ev.y + this.cfg.player.height / 2);
+        this.camLookahead = 0;
+        this.spawnDust(ev.x + this.cfg.player.width / 2, ev.y + this.cfg.player.height, 5, 1.5, 1.5);
+        break;
+      }
       case 'slam-land':
         this.shake(...SHAKE_SLAM); // the slam should FEEL heavy
         break;
@@ -1495,6 +1573,14 @@ export class PlayScene extends Phaser.Scene {
     // would carry to the next stage. The banner/overlay are already drawn; nothing left to simulate.
     if (this.transitioning || this.gameOverShown) {
       this.clearGhostTrail(); // no half-faded ghosts frozen over the banner or game-over card
+      // While the score card waits, a fresh jump or swing press moves on (a press held from play
+      // must be released first, so the card is never skipped by accident).
+      if (this.advanceStage) {
+        const pad = this.readInput();
+        const held = pad.jump || pad.attack;
+        if (held && !this.nextPressHeld) this.requestNextStage();
+        this.nextPressHeld = held;
+      }
       return;
     }
     // Break toggle — checked BEFORE the freeze gate so ESC/P both pause AND resume. The chrome
@@ -1514,10 +1600,19 @@ export class PlayScene extends Phaser.Scene {
     this.gamepadSwitchLeftHeld = device.switchLeft;
     this.gamepadSwitchRightHeld = device.switchRight;
     if (this.paused) return;
+    // Hit-stop: a kill or boss hit freezes the picture for a few frames by skipping the sim step, the
+    // same way a pause does (frozen frames are never sim frames). Presses made during the freeze are
+    // latched and handed to the next sim frame so a quick tap is never swallowed.
+    if (this.hitStop > 0) {
+      this.hitStop--;
+      this.latchedPresses = latchPresses(this.latchedPresses, this.readInput(touch.get(), device));
+      return;
+    }
     // The One Rule: one fixed step per frame, untouched. Everything below is presentation.
     const previous = this.world;
     const touchInput = touch.get();
-    const input = this.readInput(touchInput, device);
+    const input = mergeLatched(this.readInput(touchInput, device), this.latchedPresses);
+    this.latchedPresses = undefined;
     this.pendingCharacterSwitch = false;
     this.pendingPowerSelect = undefined;
     this.world = stepWorld(this.world, input, this.level, this.cfg);
@@ -1578,6 +1673,10 @@ export class PlayScene extends Phaser.Scene {
         snapshot.set({ ...snapshot.get(), visualCue: { id: this.world.frame, text } });
       }
     }
+    // A barn door touched with a friend still caged says why it stays shut (UX review #7).
+    if (lockedDoorTouched(previous, this.world, this.level, this.cfg.player)) {
+      snapshot.set({ ...snapshot.get(), visualCue: { id: this.world.frame, text: STRINGS.lockedDoor } });
+    }
     // "Hit it now" must not outlive the opening: drop it the frame the boss stops recovering.
     if (snapshot.get().visualCue?.text === STRINGS.bossOpen && !anyBossRecovering(this.world)) {
       const cleared = { ...snapshot.get() };
@@ -1587,7 +1686,9 @@ export class PlayScene extends Phaser.Scene {
     const blocked = bossTells.find((t): t is Extract<BossTell, { type: 'blocked' }> => t.type === 'blocked');
     if (blocked) this.spawnSparkles(blocked.x, blocked.y, COLLECT_PATTERN); // the guard's "clink"
     if (cues.includes('jump')) this.stretchTimer = JUICE_FRAMES; // stretch on the jump cue (no FX-event twin)
-    for (const ev of fxForTransition(this.prevWorld, this.world, bossCfg, this.teamCfgs)) this.applyFx(ev);
+    const fxEvents = fxForTransition(this.prevWorld, this.world, bossCfg, this.teamCfgs);
+    for (const ev of fxEvents) this.applyFx(ev);
+    this.hitStop = hitStopFor(fxEvents);
     // A crew-power press reads from this step's input and the state it was applied to.
     const powerUse = powerUseFx(previous, input, this.world);
     if (powerUse) this.applyFx(powerUse);
@@ -1657,8 +1758,13 @@ export class PlayScene extends Phaser.Scene {
     }
     this.applyCameraFx(p.facing, frame, biasTarget);
 
-    // Player.
+    // Player: one display scale per kid from the idle frame (UX review #12), so crouched jump and
+    // swing art no longer balloons the kid between poses. Feet stay planted (origin 0.5,1).
     this.skin(this.playerSprite, this.playerFrame(), this.playerBox(), 1.3);
+    const idleKey = `${this.playerPrefix}-idle`;
+    if (this.textures.exists(idleKey)) {
+      this.playerSprite.setScale(kidDisplayScale(this.textures.get(idleKey).getSourceImage().height, this.cfg.player.height, 1.3));
+    }
     this.playerSprite.setFlipX(p.facing === -1);
     // Squash & stretch juice (item 1): multiply the skinned scale by a short latch. skin() stays
     // untouched so every other caller is unaffected; the multiply is applied only here on the player.
@@ -1675,8 +1781,9 @@ export class PlayScene extends Phaser.Scene {
     }
     // Hit flash: a brief white fill-tint latch after a hit (frame-counted, not a tween). Composes with
     // the invuln alpha blink below. hurtPoseTimer (item 5) is ticked AFTER playerFrame() read it above.
-    if (this.hurtTint > 0) { this.playerSprite.setTintFill(this.hurtTintColor); this.hurtTint--; }
+    if (this.hurtTint > 0 && hurtFlashFill(this.reducedMotion)) this.playerSprite.setTintFill(this.hurtTintColor);
     else this.playerSprite.clearTint();
+    if (this.hurtTint > 0) this.hurtTint--;
     if (this.hurtPoseTimer > 0) this.hurtPoseTimer--;
 
     // Active crew readout: selected friend power and player-controlled resource. No rescue countdown.
@@ -1718,8 +1825,7 @@ export class PlayScene extends Phaser.Scene {
     if (p.health > this.prevHealth) for (let i = this.prevHealth; i < p.health; i++) this.pulse(this.healthPips[i]);
     this.prevHealth = p.health;
     if ((p.invisibility?.remaining ?? 0) > 0) this.playerSprite.setAlpha(0.35);
-    else if (p.invuln > 0) this.playerSprite.setAlpha(p.invuln % 8 < 4 ? 0.45 : 1);
-    else this.playerSprite.setAlpha(1);
+    else this.playerSprite.setAlpha(invulnAlpha(p.invuln, this.reducedMotion));
     this.tickGhostTrail();
 
     // Enemies: dispatch the pose by kind. Kernel: squished/turn/walk. Squirrel: its own squished KO,
@@ -1745,10 +1851,29 @@ export class PlayScene extends Phaser.Scene {
         else id = Math.floor(frame / KERNEL_PERIOD) % 2 === 0 ? 'kernel-creep-walk-a' : 'kernel-creep-walk-b';
       }
 
+      // A felled critter is dizzy for a beat, poofs, then is gone (UX review #14: never a lingering
+      // flattened body). An enemy already down when the stage drew (none today) is simply hidden.
+      if (!e.alive) {
+        const koAt = this.enemyKoFrame[i];
+        const phase = koAt === undefined ? 'gone' : koPhase(frame - koAt);
+        if (phase === 'poof') this.spawnDust(e.x + dims.width / 2, e.y + dims.height, 4, 1.2, 1.3);
+        if (phase !== 'dizzy') { sprite.setVisible(false); continue; }
+      }
+      sprite.setVisible(true);
       this.skin(sprite, id, this.box(e.x, e.y, dims.width, dims.height), 1.3);
       // KO squash pop (item 1): a felled enemy squishes flat for a few frames, then settles to the
       // flattened pose. The latch is armed by applyFx('squish'); compose it over the skinned scale.
-      if (this.enemySquish[i]! > 0) { sprite.scaleX *= 1.2; sprite.scaleY *= 0.5; this.enemySquish[i]!--; }
+      const squishing = this.enemySquish[i]! > 0;
+      if (squishing) { sprite.scaleX *= 1.2; sprite.scaleY *= 0.5; this.enemySquish[i]!--; }
+      // A dizzy wobble on the KO pose before the poof (still under reduced motion).
+      sprite.setRotation(!e.alive && !squishing && !this.reducedMotion ? Math.sin(frame * 0.5) * 0.12 : 0);
+      // Victim flash: a felled enemy flashes the regime glow for two frames (skipped under reduced motion).
+      if (this.enemyFlash[i]! > 0) {
+        if (!this.reducedMotion) sprite.setTintFill(this.hurtTintColor);
+        this.enemyFlash[i]!--;
+      } else {
+        sprite.clearTint();
+      }
       sprite.setFlipX(e.dir === -1);
     }
 
@@ -1845,7 +1970,7 @@ export class PlayScene extends Phaser.Scene {
       const rage = b.hp > 0 && activePhase(b, bc).rage === true;
       this.skin(this.bossSprite, this.bossPose(b, this.art.boss.poses, rage ? frame * 2 : frame), this.box(b.x, b.y, bc.width, bc.height), 1.25);
       this.bossSprite.setFlipX(b.dir === -1);
-      this.bossSprite.setAlpha(this.bossBlink(b) ? 0.55 : 1);
+      this.bossSprite.setAlpha(bossBlinkAlpha(b, this.reducedMotion));
       this.bossHopRageJuice(this.bossSprite, b, bc, frame, rage);
       this.drawDizzyStars(0, b, bc, frame);
       for (let i = 0; i < this.hpPips.length; i++) this.hpPips[i]!.setVisible(i < b.hp);
@@ -1864,7 +1989,7 @@ export class PlayScene extends Phaser.Scene {
           const rage = this.memberRaging(i);
           this.skin(sprite, this.bossPose(m, art.poses, rage ? frame * 2 : frame), this.box(m.x, m.y, art.config.width, art.config.height), 1.25);
           sprite.setFlipX(m.dir === -1);
-          sprite.setAlpha(this.bossBlink(m) ? 0.55 * shown : shown);
+          sprite.setAlpha(bossBlinkAlpha(m, this.reducedMotion) * shown);
           this.bossHopRageJuice(sprite, m, art.config, frame, rage);
         }
         if (m.hp > 0 || !tb.royale) this.drawDizzyStars(i, m, art.config, frame);
@@ -1906,7 +2031,7 @@ export class PlayScene extends Phaser.Scene {
     // fresh run of lives — gentle, never cruel). Built once; the sim is already frozen (run.ts).
     if (this.world.gameOver && !this.gameOverShown) {
       this.gameOverShown = true;
-      this.showGameOver();
+      this.time.delayedCall(GAME_OVER_HOLD_MS, () => this.showGameOver()); // let the tumble read first
       return;
     }
 
@@ -1934,13 +2059,11 @@ export class PlayScene extends Phaser.Scene {
       });
       saveHighScores(scoreCompletion.scores);
       if (this.replayMode) {
-        this.publishCampaign({ scoreAward: scoreCompletion.award });
-        this.time.delayedCall(2_300, () => this.quitToTitle());
+        this.holdScoreCard(scoreCompletion.award, () => this.quitToTitle());
       } else if (next) {
         const recorded = { ...scoreCompletion.session, lives: carryLives };
         this.session = advanceCampaign(recorded, next.id);
         saveCampaign(this.session);
-        this.publishCampaign({ scoreAward: scoreCompletion.award });
         // Banner pop-in (item 5): from 0.6 with a back-ease overshoot to 1 — a celebratory snap. Then
         // celebrate + fade out into the next stage (create() fades back in).
         this.banner.setScale(0.6).setVisible(true);
@@ -1950,7 +2073,7 @@ export class PlayScene extends Phaser.Scene {
         // fired), so whether the screen had reached full black at restart was a per-run coin flip → the
         // "sometimes dark" boss-arena residue leaking into the next stage. Ordering by event guarantees
         // the last painted frame before the swap is full black; the next stage's create() fades back in.
-        this.time.delayedCall(2_100, () => {
+        this.holdScoreCard(scoreCompletion.award, () => {
           this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () =>
             this.scene.restart({ level: next, session: this.session }),
           );
@@ -1960,10 +2083,9 @@ export class PlayScene extends Phaser.Scene {
         const recorded = { ...scoreCompletion.session, lives: carryLives };
         this.session = completeCampaign(recorded);
         saveCampaign(this.session);
-        this.publishCampaign({ scoreAward: scoreCompletion.award });
         // The campaign's true finale: erupt the popcorn volcano. The banner defers to the eruption
         // crescendo, so it is NOT shown here.
-        this.time.delayedCall(2_500, () => {
+        this.holdScoreCard(scoreCompletion.award, () => {
           this.publishCampaign({ completed: false });
           this.startFinale();
         });
@@ -1973,6 +2095,29 @@ export class PlayScene extends Phaser.Scene {
         this.tweens.add({ targets: this.banner, scaleX: 1, scaleY: 1, duration: 420, ease: 'Back.Out' });
       }
     }
+  }
+
+  // The stage score card (UX review #9): hold a beat so the pop or the door touch lands, then show the
+  // card and wait for the player (a Next press, or a fresh jump/swing) instead of rushing on after ~2 s.
+  // A press in the first CARD_MIN_MS is ignored; after CARD_AUTO_MS the card moves on by itself.
+  private holdScoreCard(award: import('@/ui/chrome/bus').ScoreAwardState, proceed: () => void): void {
+    this.time.delayedCall(ENDING_HOLD_MS, () => {
+      this.publishCampaign({ scoreAward: award });
+      this.cardShownAt = this.time.now;
+      this.nextPressHeld = true; // a button still held from play must be released first
+      let done = false;
+      this.advanceStage = () => {
+        if (done) return;
+        done = true;
+        this.advanceStage = undefined;
+        proceed();
+      };
+      this.time.delayedCall(CARD_AUTO_MS, () => this.advanceStage?.());
+    });
+  }
+
+  private requestNextStage(): void {
+    if (this.advanceStage && this.time.now - this.cardShownAt >= CARD_MIN_MS) this.advanceStage();
   }
 
   // Every ring boss popped: score the whole run, bank it on the local Royale record (never the campaign
@@ -2073,7 +2218,8 @@ export class PlayScene extends Phaser.Scene {
   // Draw one finale frame from the pure timeline (no sim, no randomness — the One Rule). Camera zoom,
   // veil, plume, shockwave, mound tremble, and particles are all functions of the same integer frame.
   private tickFinale(): void {
-    const kf = finaleKeyframe(this.finaleClock++, this.finaleOriginX, this.finaleGroundY);
+    const raw = finaleKeyframe(this.finaleClock++, this.finaleOriginX, this.finaleGroundY);
+    const kf = this.reducedMotion ? calmFinaleKeyframe(raw) : raw; // no push, tremble or flash
     // The King un-cobs on the pop frame: hide the frozen defeated boss sprite so his puff ring + the
     // settled popcorn (from the timeline) read as him bursting into popcorn. end-final is a single-boss
     // arena (bossSprite, never teamSprites); the optional-chain keeps dev-mounts safe.

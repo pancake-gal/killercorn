@@ -1,6 +1,5 @@
 import './styles/regime.css';
 import Phaser from 'phaser';
-import { loadEntities } from '@/entities/load';
 import { activeMount } from '@/dev/harness';
 import { applyRegime } from '@/regime/derive';
 import { TitleScene } from '@/scenes/TitleScene';
@@ -21,8 +20,6 @@ import { royaleRunFromMenu, startRoyaleRun } from '@/royale/run';
 import { loadRoyaleRecord, spicesUnlocked } from '@/royale/record';
 import { freshRoyaleSeed } from '@/scenes/play/royaleSeed';
 import { installAudioActivation } from '@/audio/activation';
-
-loadEntities();
 
 const mount = activeMount();
 

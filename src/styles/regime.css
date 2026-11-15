@@ -800,7 +800,13 @@ html[data-regime='boss'] .pause-control {
   .royale-actions .btn-primary { min-width: 0; padding: 6px 18px; font-size: 18px; }
 }
 
-/* A short, non-interactive arcade tally between the frozen clear frame and the next scene. */
+/* An arcade tally between the frozen clear frame and the next scene. Only its Keep Going button
+   takes input; the rest of the overlay stays click-through. */
+.score-award-next {
+  pointer-events: auto;
+  margin-top: 10px;
+}
+
 .score-award-overlay {
   position: fixed;
   z-index: 29;

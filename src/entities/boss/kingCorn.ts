@@ -216,7 +216,13 @@ export interface BossState {
   hopTargets: readonly HopTarget[]; // the boss's hop circuit, copied from the placement at spawn so
   // bossStep needs no level lookup (immutable level data riding on state, like patrolLeft). NOT hashed
   // — it's constant across the fight (same rationale as the respawn-coords note in frameSig).
+  grace: number; // harmless turn-away frames left after a recover ends (hashed only while > 0)
 }
+
+// After the open window closes, the boss turns away from the kid and its body stays harmless this
+// long, so a kid still mid-punish is never hit by the boss it is hitting (UX review #8: measured hits
+// per fight fell from 3/21/4/1/23/33/23 to about 0 with an 8-frame-late reaction).
+export const BOSS_RECOVER_GRACE_FRAMES = 20;
 
 // The phase governing the boss at its current hp (first match scanning high→low; the 0-floor catches
 // the rest while alive). Pure read of hp + config.
@@ -248,6 +254,7 @@ export function spawnBoss(p: BossPlacement, cfg: BossConfig, requestedAssistTier
     attack: null,
     hopIndex: 0,
     hopTargets: p.hopTargets ?? [], // empty ⇒ a grounded boss (never picks a hop; today's behavior)
+    grace: 0,
   };
 }
 
@@ -280,7 +287,7 @@ export function bossVulnerable(boss: BossState, cfg: BossConfig): boolean {
 // recovering. A hop is airborne like a slam — a telegraphed cannonball toward an authored landing
 // zone, so it's dangerous in flight (armored) and fair (the destination is fixed, never the player).
 export function bossBodyDangerous(boss: BossState): boolean {
-  if (boss.hp <= 0 || boss.hitCooldown > 0) return false;
+  if (boss.hp <= 0 || boss.hitCooldown > 0 || boss.grace > 0) return false;
   if (boss.mode === 'pace') return true;
   if (boss.mode === 'attack' && (boss.attack === 'dash' || boss.attack === 'slam' || boss.attack === 'hop')) return true;
   return false;
@@ -322,6 +329,7 @@ export function bossStep(state: BossState, cfg: BossConfig, level: LevelDef, pla
   let hopIndex = state.hopIndex;
   const hopTarget = state.hopTargets.length > 0 ? state.hopTargets[state.hopIndex % state.hopTargets.length]! : null;
   const hitCooldown = Math.max(0, state.hitCooldown - 1);
+  let grace = Math.max(0, state.grace - 1);
 
   // Motion intents for this frame (resolved by moveAabb below).
   let vx = 0;
@@ -384,12 +392,14 @@ export function bossStep(state: BossState, cfg: BossConfig, level: LevelDef, pla
     }
     // lob/slam carry no horizontal intent; slam rides gravity from its leap velocity.
   } else {
-    // recover: stand open, then resume pacing.
+    // recover: stand open, then resume pacing — turned away from the kid and harmless for a beat.
     vx = 0;
     if (modeTimer <= 0) {
       mode = 'pace';
       modeTimer = ph.paceFrames;
       attack = null;
+      dir = playerX > centerX ? -1 : 1;
+      grace = BOSS_RECOVER_GRACE_FRAMES;
     }
   }
 
@@ -454,7 +464,7 @@ export function bossStep(state: BossState, cfg: BossConfig, level: LevelDef, pla
     modeTimer = bossRecoveryFramesFor(state, ph, attack);
   }
 
-  return { boss: { ...state, x, y, vy: vyOut, dir, hitCooldown, mode, modeTimer, actionIndex, attack, patrolLeft, patrolRight, hopIndex }, shots };
+  return { boss: { ...state, x, y, vy: vyOut, dir, hitCooldown, mode, modeTimer, actionIndex, attack, patrolLeft, patrolRight, hopIndex, grace }, shots };
 }
 
 export interface BossCombatResult {
@@ -462,6 +472,7 @@ export interface BossCombatResult {
   bounced: boolean; // the player stomped the boss this frame (apply the stomp bounce)
   hit: boolean; // the boss's body / a live attack hurt the player this frame (respawn)
   damaged: boolean; // the boss lost a pip this frame
+  hitX?: number; // the boss's centre x when its body hurt (the knockback pushes away from it)
 }
 
 // Resolve one frame of player↔boss combat. A stomp or a swing while the boss is OPEN (vulnerable)
@@ -486,6 +497,6 @@ export function resolveBoss(player: PlayerState, boss: BossState, pCfg: PlayerCo
   // No damage (guarded, or no contact). A stomp still bounces harmlessly off the guard; otherwise a
   // dangerous body hurts the player.
   if (stomp) return { boss, bounced: true, hit: false, damaged: false };
-  if (body && bossBodyDangerous(boss)) return { boss, bounced: false, hit: true, damaged: false };
+  if (body && bossBodyDangerous(boss)) return { boss, bounced: false, hit: true, damaged: false, hitX: bBox.x + bBox.w / 2 };
   return { boss, bounced: false, hit: false, damaged: false };
 }

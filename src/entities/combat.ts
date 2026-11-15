@@ -25,6 +25,7 @@ export interface CombatResult {
   enemies: EnemyState[];
   bounced: boolean; // the player stomped something this frame (apply the stomp bounce)
   hit: boolean; // a live mob hurt the player this frame (respawn at the last checkpoint)
+  hitX?: number; // centre x of the first mob that hurt (the knockback pushes away from it)
 }
 
 export function resolveCombat(
@@ -37,6 +38,7 @@ export function resolveCombat(
   const hb = swingHitbox(player, pCfg);
   let bounced = false;
   let hit = false;
+  let hitX: number | undefined;
 
   const out = enemies.map((e) => {
     if (!e.alive) return e;
@@ -51,8 +53,9 @@ export function resolveCombat(
       return { ...e, alive: false }; // stomp squish
     }
     hit = true; // body contact that is neither a swing nor a stomp — it hurts
+    hitX ??= eBox.x + eBox.w / 2;
     return e;
   });
 
-  return { enemies: out, bounced, hit };
+  return { enemies: out, bounced, hit, ...(hitX !== undefined ? { hitX } : {}) };
 }

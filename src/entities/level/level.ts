@@ -314,6 +314,8 @@ export const WORLD_1_RANGE: LevelDef = {
     { x: 1800, y: 420, w: 60, h: 80, respawn: { x: 1800, y: 430 } },
     { x: 3500, y: 300, w: 60, h: 200, respawn: { x: 3500, y: 430 } }, // tail checkpoint (item 4): clear ground between the x3120 + x3760 perches
   ],
+  // A ground pie between perches 3 and 4: seven lobbers and no heal cost cautious kids two lives.
+  pickups: [{ kind: 'health', x: 2300, y: 472 }],
   goal: { x: 4400, y: 340, w: 60, h: 160 }, // barn door at the far right
 };
 
@@ -565,7 +567,9 @@ export const FIELD_CARROT: LevelDef = {
     terrace(3620, 438, 300), // bed 7 (tail)
     terrace(4080, 440, 300), // bed 8, last row before the door
   ],
-  pits: [{ id: 'root-row-trench', x: 3020, y: 500, w: 104 }],
+  // The trench sits a run-up past bed 5's drop (was x3020, 20 px past it: walking off the bed fell in).
+  // x3104 also keeps the shared climb route deathless for every kid (rollup character coverage).
+  pits: [{ id: 'root-row-trench', x: 3104, y: 500, w: 104 }],
   switches: [{ id: 'root-row-lever', x: 1496, y: 444, w: 28, h: 44, accepts: 'swing' }],
   gates: [{ id: 'root-row-gate', switchId: 'root-row-lever', x: 1512, y: 372, w: 32, h: 128 }],
   enemies: [

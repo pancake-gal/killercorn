@@ -11,7 +11,7 @@ import { type CollectibleState, spawnCollectible, collectStep } from '@/entities
 import { type ProjectileState, type ProjectileConfig, projectileStep, resolveProjectiles, SPIKED_CORN_CONFIG } from '@/entities/projectile/spikedCorn';
 import { tossPeel, resolvePeels, PEEL_CONFIG } from '@/entities/projectile/peel';
 import { type AllyState, type AllyConfig, spawnAlly, resolveAllies, ALLY_CONFIG } from '@/entities/ally/produce';
-import { hazardHit } from '@/entities/hazard/thresher';
+import { hazardHitX } from '@/entities/hazard/thresher';
 import { resolveCombat } from '@/entities/combat';
 import { type BossState, spawnBoss, bossStep, resolveBoss } from '@/entities/boss/kingCorn';
 import { bossConfigFor } from '@/entities/boss/configs';
@@ -391,7 +391,15 @@ export function stepWorld(world: WorldState, input: InputFrame, level: LevelDef,
   const wonArena = bossDefeated || teamBossDefeated;
 
   const enemyHit = combat.hit || (bossCombat?.hit ?? false) || (teamCombat?.hit ?? false) || projResolved.hit;
-  const hurt = (!invisible && enemyHit) || hazardHit(level.hazards, movedBox) || nutResolved.hit;
+  const hazardX = hazardHitX(level.hazards, movedBox);
+  const hurt = (!invisible && enemyHit) || hazardX !== undefined || nutResolved.hit;
+  // The knockback pushes AWAY from whatever hurt (UX review Tier 3): a hit from behind used to throw
+  // the kid along -facing, straight into the threat. Fixed source priority keeps it deterministic.
+  const sourceX = (!invisible && enemyHit
+    ? combat.hitX ?? bossCombat?.hitX ?? teamCombat?.hitX ?? projResolved.hitX
+    : undefined) ?? hazardX ?? nutResolved.hitX;
+  const kidCenterX = moved.x + pCfg.width / 2;
+  const away = sourceX === undefined || sourceX === kidCenterX ? -player.facing : sourceX < kidCenterX ? 1 : -1;
   const fellIntoPit = moved.y > level.height + PIT_RESPAWN_DEPTH;
   let deaths = world.deaths;
   let gameOver = false;
@@ -410,10 +418,10 @@ export function stepWorld(world: WorldState, input: InputFrame, level: LevelDef,
   } else if (hurt && !wonArena && player.invuln <= 0) {
     if (player.shield) {
       // The block spends the leaf; only a checkpoint or wheat box regrows it.
-      player = { ...player, shield: false, powerCharges: Math.max(0, player.powerCharges - 1), powerTimer: 0, vx: -player.facing * SHIELD_KNOCKBACK_VX, vy: -SHIELD_KNOCKBACK_VY, onGround: false };
+      player = { ...player, shield: false, powerCharges: Math.max(0, player.powerCharges - 1), powerTimer: 0, vx: away * SHIELD_KNOCKBACK_VX, vy: -SHIELD_KNOCKBACK_VY, onGround: false };
     } else if (player.health > 1) {
       // Survived: one pip off, mercy frames + a knockback so the same threat can't chain-drain.
-      player = { ...player, health: player.health - 1, invuln: HURT_IFRAMES, vx: -player.facing * HIT_KNOCKBACK_VX, vy: -HIT_KNOCKBACK_VY, onGround: false };
+      player = { ...player, health: player.health - 1, invuln: HURT_IFRAMES, vx: away * HIT_KNOCKBACK_VX, vy: -HIT_KNOCKBACK_VY, onGround: false };
     } else {
       // The bar emptied — a life is lost.
       deaths += 1;
@@ -512,7 +520,7 @@ function frameSig(w: WorldState): string {
   // byte-for-byte unchanged (the keep-untouched-digests-stable pattern — cf. pw/hp/lv above).
   const b = w.boss;
   const bossSeg = b
-    ? `|${b.x},${b.y},${b.vy},${b.dir},${b.hp},${b.hitCooldown},${b.patrolLeft},${b.patrolRight},${b.mode},${b.modeTimer},${b.actionIndex},${b.attack ?? '-'}${b.hopIndex > 0 ? `,H:${b.hopIndex}` : ''}${b.assistTier > 0 ? `,A:${b.assistTier}` : ''}`
+    ? `|${b.x},${b.y},${b.vy},${b.dir},${b.hp},${b.hitCooldown},${b.patrolLeft},${b.patrolRight},${b.mode},${b.modeTimer},${b.actionIndex},${b.attack ?? '-'}${b.hopIndex > 0 ? `,H:${b.hopIndex}` : ''}${b.assistTier > 0 ? `,A:${b.assistTier}` : ''}${b.grace > 0 ? `,G:${b.grace}` : ''}`
     : '';
   // Team-boss segment (each shaker, full state incl. patrol bounds + state machine — mirrors the
   // single-boss segment so the digest hashes the complete TeamBossState) — appended only in a team
@@ -520,7 +528,7 @@ function frameSig(w: WorldState): string {
   // rides here too (Pepper hops), or it would be an un-pinned determinism hole.
   const tb = w.teamBoss;
   const teamSeg = tb
-    ? `|T:${tb.members.map((m) => `${m.x},${m.y},${m.vy},${m.dir},${m.hp},${m.hitCooldown},${m.patrolLeft},${m.patrolRight},${m.mode},${m.modeTimer},${m.actionIndex},${m.attack ?? '-'}${m.hopIndex > 0 ? `,H:${m.hopIndex}` : ''}${m.assistTier > 0 ? `,A:${m.assistTier}` : ''}`).join(';')}`
+    ? `|T:${tb.members.map((m) => `${m.x},${m.y},${m.vy},${m.dir},${m.hp},${m.hitCooldown},${m.patrolLeft},${m.patrolRight},${m.mode},${m.modeTimer},${m.actionIndex},${m.attack ?? '-'}${m.hopIndex > 0 ? `,H:${m.hopIndex}` : ''}${m.assistTier > 0 ? `,A:${m.assistTier}` : ''}${m.grace > 0 ? `,G:${m.grace}` : ''}`).join(';')}`
     : '';
   // Boss Royale ring state — appended only on the royale ring, so every other level is unchanged.
   const royaleSeg = tb?.royale ? `|R:${royaleSig(tb.royale)}` : '';

@@ -37,6 +37,7 @@ export type ChromeIntent =
   | { type: 'select-power'; power: CrewPower }
   | { type: 'restart-stage' }
   | { type: 'retry' }
+  | { type: 'next-stage' } // the stage score card's Next button (PlayScene moves on once it may)
   | { type: 'quit-title' }
   | { type: 'replay-stage'; stageId: string }
   | { type: 'start-royale'; characterId: string; spices: RoyaleSpices } // title → a fresh Boss Royale run

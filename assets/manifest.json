@@ -79,7 +79,7 @@
     {
       "id": "butter-stick-card",
       "kind": "poster",
-      "path": "/assets/posters/butter-stick-card.png"
+      "path": "/assets/posters/butter-stick-card.webp"
     },
     {
       "id": "butter-stick-defeated",
@@ -164,42 +164,42 @@
     {
       "id": "finale-eruption-plume",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-eruption-plume.png"
+      "path": "/assets/sprites/finale/finale-eruption-plume.webp"
     },
     {
       "id": "finale-husk-shard",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-husk-shard.png"
+      "path": "/assets/sprites/finale/finale-husk-shard.webp"
     },
     {
       "id": "finale-popcorn-kernel",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-popcorn-kernel.png"
+      "path": "/assets/sprites/finale/finale-popcorn-kernel.webp"
     },
     {
       "id": "finale-popcorn-puff-a",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-popcorn-puff-a.png"
+      "path": "/assets/sprites/finale/finale-popcorn-puff-a.webp"
     },
     {
       "id": "finale-popcorn-puff-b",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-popcorn-puff-b.png"
+      "path": "/assets/sprites/finale/finale-popcorn-puff-b.webp"
     },
     {
       "id": "finale-popcorn-puff-c",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-popcorn-puff-c.png"
+      "path": "/assets/sprites/finale/finale-popcorn-puff-c.webp"
     },
     {
       "id": "finale-popcorn-puff-d",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-popcorn-puff-d.png"
+      "path": "/assets/sprites/finale/finale-popcorn-puff-d.webp"
     },
     {
       "id": "finale-volcano-cinematic",
       "kind": "gameplay",
-      "path": "/assets/sprites/finale/finale-volcano-cinematic.png"
+      "path": "/assets/sprites/finale/finale-volcano-cinematic.webp"
     },
     {
       "id": "fred-fall",
@@ -239,7 +239,7 @@
     {
       "id": "general-acorn-card",
       "kind": "poster",
-      "path": "/assets/posters/general-acorn-card.png"
+      "path": "/assets/posters/general-acorn-card.webp"
     },
     {
       "id": "general-acorn-defeated",
@@ -339,7 +339,7 @@
     {
       "id": "king-corn-card",
       "kind": "poster",
-      "path": "/assets/posters/king-corn-card.png"
+      "path": "/assets/posters/king-corn-card.webp"
     },
     {
       "id": "king-corn-defeated",
@@ -489,7 +489,7 @@
     {
       "id": "salt-and-pepper-card",
       "kind": "poster",
-      "path": "/assets/posters/salt-and-pepper-card.png"
+      "path": "/assets/posters/salt-and-pepper-card.webp"
     },
     {
       "id": "salt-attack",
@@ -514,7 +514,7 @@
     {
       "id": "sir-pickle-card",
       "kind": "poster",
-      "path": "/assets/posters/sir-pickle-card.png"
+      "path": "/assets/posters/sir-pickle-card.webp"
     },
     {
       "id": "sir-pickle-defeated",
@@ -649,7 +649,7 @@
     {
       "id": "title-splash",
       "kind": "poster",
-      "path": "/assets/posters/title-splash.png"
+      "path": "/assets/posters/title-splash.webp"
     },
     {
       "id": "wheat-box-burst",
@@ -674,102 +674,102 @@
     {
       "id": "world1-bg-far",
       "kind": "gameplay",
-      "path": "/assets/sprites/world1-bg-far.png"
+      "path": "/assets/sprites/world1-bg-far.webp"
     },
     {
       "id": "world1-bg-mid",
       "kind": "gameplay",
-      "path": "/assets/sprites/world1-bg-mid.png"
+      "path": "/assets/sprites/world1-bg-mid.webp"
     },
     {
       "id": "world1-bg-near",
       "kind": "gameplay",
-      "path": "/assets/sprites/world1-bg-near.png"
+      "path": "/assets/sprites/world1-bg-near.webp"
     },
     {
       "id": "world1-tileset",
       "kind": "gameplay",
-      "path": "/assets/sprites/world1-tileset.png"
+      "path": "/assets/sprites/world1-tileset.webp"
     },
     {
       "id": "world2-bg-far",
       "kind": "gameplay",
-      "path": "/assets/sprites/world2-bg-far.png"
+      "path": "/assets/sprites/world2-bg-far.webp"
     },
     {
       "id": "world2-bg-mid",
       "kind": "gameplay",
-      "path": "/assets/sprites/world2-bg-mid.png"
+      "path": "/assets/sprites/world2-bg-mid.webp"
     },
     {
       "id": "world2-bg-near",
       "kind": "gameplay",
-      "path": "/assets/sprites/world2-bg-near.png"
+      "path": "/assets/sprites/world2-bg-near.webp"
     },
     {
       "id": "world2-tileset",
       "kind": "gameplay",
-      "path": "/assets/sprites/world2-tileset.png"
+      "path": "/assets/sprites/world2-tileset.webp"
     },
     {
       "id": "world3-bg-far",
       "kind": "gameplay",
-      "path": "/assets/sprites/world3-bg-far.png"
+      "path": "/assets/sprites/world3-bg-far.webp"
     },
     {
       "id": "world3-bg-mid",
       "kind": "gameplay",
-      "path": "/assets/sprites/world3-bg-mid.png"
+      "path": "/assets/sprites/world3-bg-mid.webp"
     },
     {
       "id": "world3-bg-near",
       "kind": "gameplay",
-      "path": "/assets/sprites/world3-bg-near.png"
+      "path": "/assets/sprites/world3-bg-near.webp"
     },
     {
       "id": "world3-tileset",
       "kind": "gameplay",
-      "path": "/assets/sprites/world3-tileset.png"
+      "path": "/assets/sprites/world3-tileset.webp"
     },
     {
       "id": "world4-bg-far",
       "kind": "gameplay",
-      "path": "/assets/sprites/world4-bg-far.png"
+      "path": "/assets/sprites/world4-bg-far.webp"
     },
     {
       "id": "world4-bg-mid",
       "kind": "gameplay",
-      "path": "/assets/sprites/world4-bg-mid.png"
+      "path": "/assets/sprites/world4-bg-mid.webp"
     },
     {
       "id": "world4-bg-near",
       "kind": "gameplay",
-      "path": "/assets/sprites/world4-bg-near.png"
+      "path": "/assets/sprites/world4-bg-near.webp"
     },
     {
       "id": "world4-tileset",
       "kind": "gameplay",
-      "path": "/assets/sprites/world4-tileset.png"
+      "path": "/assets/sprites/world4-tileset.webp"
     },
     {
       "id": "world5-bg-far",
       "kind": "gameplay",
-      "path": "/assets/sprites/world5-bg-far.png"
+      "path": "/assets/sprites/world5-bg-far.webp"
     },
     {
       "id": "world5-bg-mid",
       "kind": "gameplay",
-      "path": "/assets/sprites/world5-bg-mid.png"
+      "path": "/assets/sprites/world5-bg-mid.webp"
     },
     {
       "id": "world5-bg-near",
       "kind": "gameplay",
-      "path": "/assets/sprites/world5-bg-near.png"
+      "path": "/assets/sprites/world5-bg-near.webp"
     },
     {
       "id": "world5-tileset",
       "kind": "gameplay",
-      "path": "/assets/sprites/world5-tileset.png"
+      "path": "/assets/sprites/world5-tileset.webp"
     }
   ]
 }

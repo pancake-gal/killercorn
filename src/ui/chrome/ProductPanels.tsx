@@ -107,7 +107,7 @@ function characterName(characterId: string): string {
   return CHARACTER_ROSTER.find((character) => character.id === characterId)?.title ?? characterId;
 }
 
-export function ScoreAward({ award }: { award: ScoreAwardState }) {
+export function ScoreAward({ award, onNext }: { award: ScoreAwardState; onNext: () => void }) {
   const title = stageTitle(CAMPAIGN.find((level) => level.id === award.stageId)?.titleId, award.stageId);
   const goals = stageReplayGoals({
     stageId: award.stageId,
@@ -132,7 +132,7 @@ export function ScoreAward({ award }: { award: ScoreAwardState }) {
           <div><dt>Clean</dt><dd>{formatScore(award.breakdown.flawless)}</dd></div>
           <div><dt>Pace</dt><dd>{formatScore(award.breakdown.pace)}</dd></div>
         </dl>
-        <small>{clearTime(award.frames)} · {award.cobs} cobs</small>
+        <small>{clearTime(award.frames)} · {award.cobs} {award.cobs === 1 ? 'cob' : 'cobs'}</small>
         <ul className="score-replay-goals" aria-label="Friendly replay goals">
           {goals.map((goal) => (
             <li key={goal.id} data-achieved={goal.achieved}>
@@ -147,6 +147,8 @@ export function ScoreAward({ award }: { award: ScoreAwardState }) {
             {award.gameRank ? `Rank #${award.gameRank}` : ''}
           </p>
         )}
+        {/* The card waits for the player (UX review #9). A jump or swing press also moves on. */}
+        <button type="button" className="btn-primary score-award-next" onClick={onNext}>{STRINGS.keepGoing}</button>
       </section>
     </div>
   );

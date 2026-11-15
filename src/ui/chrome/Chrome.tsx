@@ -71,10 +71,12 @@ export function Chrome() {
     intent.emit({ type: 'replay-stage', stageId });
   };
 
-  useEffect(() => {
-    applySettings(gameSettings);
-    saveSettings(gameSettings);
-  }, [gameSettings]);
+  // Saved only on a player change: an unsaved device keeps following the OS "reduce motion" answer.
+  useEffect(() => applySettings(gameSettings), [gameSettings]);
+  const changeSettings = (next: typeof gameSettings) => {
+    saveSettings(next);
+    setGameSettings(next);
+  };
   useEffect(() => saveBindings(bindings), [bindings]);
   useEffect(() => {
     if (!visualCue) return;
@@ -182,7 +184,7 @@ export function Chrome() {
       {panel === 'settings' && (
         <SettingsPanel
           value={gameSettings}
-          onChange={setGameSettings}
+          onChange={changeSettings}
           bindings={bindings}
           onBindingsChange={setBindings}
           volume={volume}
@@ -227,7 +229,7 @@ export function Chrome() {
           {tutorialCue.text}
         </div>
       )}
-      {scoreAward && !autoCredits && <ScoreAward award={scoreAward} />}
+      {scoreAward && !autoCredits && <ScoreAward award={scoreAward} onNext={() => intent.emit({ type: 'next-stage' })} />}
       {visualCue && <div className="visual-cue" role="status" aria-live="polite">{visualCue === expiredCue ? '' : visualCue.text}</div>}
       <FullscreenControl />
       <AudioControl />

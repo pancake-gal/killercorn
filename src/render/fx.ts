@@ -26,7 +26,10 @@ export type FxEvent =
   | { type: 'rage-start' } // King Corn just entered his RAGE last pip — a roar + heavy shake
   | { type: 'ally-freed'; i: number; x: number; y: number } // ally i freed — sparkle ring
   | { type: 'power-up'; x: number; y: number } // a power was (re-)granted — sparkle ring at the player
-  | { type: 'power-use'; power: ActivePower; x: number; y: number; facing: number }; // a crew power fired — dust + afterimage
+  | { type: 'power-use'; power: ActivePower; x: number; y: number; facing: number } // a crew power fired — dust + afterimage
+  | { type: 'checkpoint'; i: number } // checkpoint i just armed — a sparkle burst on its marker
+  | { type: 'shield-block'; x: number; y: number } // the leaf absorbed a hit — a leaf-colored sparkle ring
+  | { type: 'respawn'; x: number; y: number }; // a life was lost and the kid is back at the checkpoint — camera snap + poof
 
 // The crew powers with a pressed activation (the only branches that raise powerCooldown).
 type ActivePower = 'berryRush' | 'blueBounce' | 'peelToss';
@@ -153,6 +156,12 @@ export function fxForTransition(prev: WorldState, curr: WorldState, bossCfg?: Bo
   if (!freedNow && cp.power !== 'none' && (cp.power !== pp.power || cp.powerTimer > pp.powerTimer)) {
     evs.push({ type: 'power-up', x: cp.x, y: cp.y });
   }
+
+  // Checkpoint armed (forward only in the sim), the leaf soaking a hit, and a life-loss respawn
+  // (never on the game-over frame, which freezes in place) — feedback the sim state already holds.
+  if (curr.checkpoint > prev.checkpoint) evs.push({ type: 'checkpoint', i: curr.checkpoint });
+  if (pp.shield && !cp.shield && !tookHit) evs.push({ type: 'shield-block', x: cp.x, y: cp.y });
+  if (curr.deaths > prev.deaths && !curr.gameOver) evs.push({ type: 'respawn', x: cp.x, y: cp.y });
 
   // The jump stretch latch has no dedicated FX event (a jump moves nothing on screen to burst) — the
   // scene reads the audio 'jump' cue for it.
