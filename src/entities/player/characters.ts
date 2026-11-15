@@ -33,8 +33,9 @@ export const CHARACTER_ROSTER: readonly CharacterDef[] = [
     id: 'theo',
     title: 'Theo',
     trait: 'Built to barrel. Fast feet, low hops.',
-    // heavy runner: faster top speed, a heavier and shorter jump.
-    config: { ...FRED_CONFIG, maxRun: 5.1, runAccel: 0.75, jumpV: -11.5, gravity: 0.82 },
+    // heavy runner: faster top speed, a heavier and shorter jump. The hop (~97px apex vs Fred's ~105)
+    // still clears the tallest loot ledge with the reachability gate's margin (1-1 needs 94px).
+    config: { ...FRED_CONFIG, maxRun: 5.1, runAccel: 0.75, jumpV: -13, gravity: 0.82 },
   },
   {
     id: 'rosa',

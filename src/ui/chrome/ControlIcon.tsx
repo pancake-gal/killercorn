@@ -6,7 +6,7 @@ export type ControlIconName =
   | 'left'
   | 'right'
   | 'jump'
-  | 'swing'
+  | 'sword'
   | 'power'
   | 'pause'
   | 'fullscreen-enter'
@@ -23,8 +23,16 @@ export function ControlIcon({ name }: { name: ControlIconName }) {
         return <><path d="m8.5 5.5 6.5 6.5-6.5 6.5" /><path d="M15 12H5.5" /></>;
       case 'jump':
         return <><path d="m6 14 6-6 6 6" /><path d="M12 8v10" /><path d="M6.5 19h11" /></>;
-      case 'swing':
-        return <><path d="M5.5 18.5c5.2-1.1 9.4-5.3 12.8-12.8" /><path d="M15.5 5.5h4" /><path d="M17.5 3.5v4" /></>;
+      case 'sword':
+        // Blade tip up-right, crossguard, grip, and pommel down-left: reads as "attack" at thumb size.
+        return (
+          <>
+            <path d="M19.5 4.5 18.4 7.6 10.3 15.7 8.3 13.7 16.4 5.6Z" />
+            <path d="M6.5 11.9 12.1 17.5" />
+            <path d="M9.3 14.7 6.8 17.2" />
+            <circle cx="5.9" cy="18.1" r="1.2" />
+          </>
+        );
       case 'power':
         return <path d="m12 3.7 2.35 4.76 5.25.76-3.8 3.7.9 5.23L12 15.68l-4.7 2.47.9-5.23-3.8-3.7 5.25-.76L12 3.7Z" />;
       case 'pause':
