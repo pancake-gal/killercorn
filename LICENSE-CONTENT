@@ -1,0 +1,24 @@
+KILLER CORN Content License
+© 2026 Pancake Gal. All rights reserved.
+
+Scope. This license covers the game's art and audio media files: the image and audio files (.png, .webp, .ico, .wav, .ogg, .mp3) under assets/ and docs/media/. Everything else in this repository, including the story and interface text in src/, is code licensed under AGPL-3.0-only; see LICENSE and NOTICE.md.
+
+All rights reserved. The art and audio are not open source. Pancake Gal keeps all rights in them. No license to copy, change, share, or otherwise use them is given except the permissions below.
+
+Permissions. You may:
+1. Play the game. Playing, streaming, recording, and reviewing the game are always permitted, including on monetized channels, and so is sharing screenshots and video of play.
+2. Download this repository, then build and run the game, including versions you change, for your own private, non-commercial use.
+3. Share unchanged copies of this repository, including through the hosting platform's fork feature.
+
+Not permitted without written permission from Pancake Gal:
+- publishing, hosting, or distributing a changed version of the game that includes this art or audio;
+- sharing the art or audio on their own, or using them in any other work, product, or dataset;
+- any commercial use beyond permission 1.
+
+Changes. Pancake Gal may change these permissions for later versions. A change cannot revoke the permissions above for a version already released.
+
+Rights held. This license applies only to the extent Pancake Gal holds copyright or similar rights in the media. Some images and audio were produced with generative tools under human direction and review (see the in-game credits); no exclusive rights are claimed in elements that copyright does not protect.
+
+Trademarks. This license grants no rights to the KILLER CORN or Pancake Gal names or logos; see TRADEMARK.md.
+
+No warranty. The media are provided as is, without warranty of any kind.

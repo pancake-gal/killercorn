@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "cues": [
+    {
+      "id": "acorn-battle-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/acorn-battle-theme.wav"
+    },
+    {
+      "id": "boss-battle-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/boss-battle-theme.wav"
+    },
+    {
+      "id": "boss-defeat",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/boss-defeat.wav"
+    },
+    {
+      "id": "boss-roar",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/boss-roar.wav"
+    },
+    {
+      "id": "boss-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/boss-theme.wav"
+    },
+    {
+      "id": "boss-windup",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/boss-windup.wav"
+    },
+    {
+      "id": "box-break",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/box-break.wav"
+    },
+    {
+      "id": "collect",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/collect.wav"
+    },
+    {
+      "id": "extra-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/extra-theme.wav"
+    },
+    {
+      "id": "field2-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/field2-theme.wav"
+    },
+    {
+      "id": "field3-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/field3-theme.wav"
+    },
+    {
+      "id": "field4-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/field4-theme.wav"
+    },
+    {
+      "id": "field5-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/field5-theme.wav"
+    },
+    {
+      "id": "finale-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/finale-theme.wav"
+    },
+    {
+      "id": "free-ally",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/free-ally.wav"
+    },
+    {
+      "id": "hop-thud",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/hop-thud.wav"
+    },
+    {
+      "id": "hurt",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/hurt.wav"
+    },
+    {
+      "id": "jump",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/jump.wav"
+    },
+    {
+      "id": "king-corn-rage-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/king-corn-rage-theme.wav"
+    },
+    {
+      "id": "king-corn-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/king-corn-theme.wav"
+    },
+    {
+      "id": "land",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/land.wav"
+    },
+    {
+      "id": "overworld-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/overworld-theme.wav"
+    },
+    {
+      "id": "pickle-battle-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/pickle-battle-theme.wav"
+    },
+    {
+      "id": "power-up",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/power-up.wav"
+    },
+    {
+      "id": "rage-roar",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/rage-roar.wav"
+    },
+    {
+      "id": "slam-thud",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/slam-thud.wav"
+    },
+    {
+      "id": "squish",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/squish.wav"
+    },
+    {
+      "id": "swing",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/swing.wav"
+    },
+    {
+      "id": "throw",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/throw.wav"
+    },
+    {
+      "id": "ui",
+      "kind": "sfx",
+      "path": "/assets/audio/sfx/ui.wav"
+    },
+    {
+      "id": "victory-theme",
+      "kind": "music",
+      "path": "/assets/audio/music/victory-theme.wav"
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "name": "killercorn",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only AND LicenseRef-KillerCorn-Content",
+  "type": "module",
+  "description": "The corn has gone bad. A deterministic 2D side-scroller where a farm kid mashes the snacks gone bad.",
+  "scripts": {
+    "dev": "vite",
+    "dev:lan": "vite --host",
+    "build": "tsc --noEmit && vite build",
+    "build:play": "tsc --noEmit && vite build --base=/play/",
+    "preview": "vite preview",
+    "landing": "vite docs --port 5310 --open /landing.html",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run typecheck && npm run build"
+  },
+  "dependencies": {
+    "phaser": "^3.90.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "typescript": "^5.7.0",
+    "vite": "^6.0.0"
+  }
+}

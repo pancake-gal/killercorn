@@ -1,0 +1,775 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "ally-banana-caged",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-banana/ally-banana-caged.webp"
+    },
+    {
+      "id": "ally-banana-freed",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-banana/ally-banana-freed.webp"
+    },
+    {
+      "id": "ally-blueberry-caged",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-blueberry/ally-blueberry-caged.webp"
+    },
+    {
+      "id": "ally-blueberry-freed",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-blueberry/ally-blueberry-freed.webp"
+    },
+    {
+      "id": "ally-carrot-caged",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-carrot/ally-carrot-caged.webp"
+    },
+    {
+      "id": "ally-carrot-freed",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-carrot/ally-carrot-freed.webp"
+    },
+    {
+      "id": "ally-lettuce-caged",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-lettuce/ally-lettuce-caged.webp"
+    },
+    {
+      "id": "ally-lettuce-freed",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-lettuce/ally-lettuce-freed.webp"
+    },
+    {
+      "id": "ally-strawberry-caged",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-strawberry/ally-strawberry-caged.webp"
+    },
+    {
+      "id": "ally-strawberry-freed",
+      "kind": "gameplay",
+      "path": "/assets/sprites/ally-strawberry/ally-strawberry-freed.webp"
+    },
+    {
+      "id": "app-icon-192",
+      "kind": "ui",
+      "path": "/assets/icons/app-icon-192.png"
+    },
+    {
+      "id": "app-icon-512",
+      "kind": "ui",
+      "path": "/assets/icons/app-icon-512.png"
+    },
+    {
+      "id": "apple-touch-icon",
+      "kind": "ui",
+      "path": "/assets/icons/apple-touch-icon.png"
+    },
+    {
+      "id": "banana-peel",
+      "kind": "gameplay",
+      "path": "/assets/sprites/banana-peel/banana-peel.webp"
+    },
+    {
+      "id": "bounce-pad",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/bounce-pad.webp"
+    },
+    {
+      "id": "butter-stick-card",
+      "kind": "poster",
+      "path": "/assets/posters/butter-stick-card.png"
+    },
+    {
+      "id": "butter-stick-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/butter-stick/butter-stick-defeated.webp"
+    },
+    {
+      "id": "butter-stick-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/butter-stick/butter-stick-hurt.webp"
+    },
+    {
+      "id": "butter-stick-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/butter-stick/butter-stick-idle.webp"
+    },
+    {
+      "id": "butter-stick-lunge",
+      "kind": "gameplay",
+      "path": "/assets/sprites/butter-stick/butter-stick-lunge.webp"
+    },
+    {
+      "id": "checkpoint-marker",
+      "kind": "gameplay",
+      "path": "/assets/sprites/checkpoint/checkpoint-marker.webp"
+    },
+    {
+      "id": "daisy-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-fall.webp"
+    },
+    {
+      "id": "daisy-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-hurt.webp"
+    },
+    {
+      "id": "daisy-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-idle.webp"
+    },
+    {
+      "id": "daisy-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-jump.webp"
+    },
+    {
+      "id": "daisy-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-run.webp"
+    },
+    {
+      "id": "daisy-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-run-b.webp"
+    },
+    {
+      "id": "daisy-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/daisy/daisy-swing.webp"
+    },
+    {
+      "id": "dust-puff",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fx/dust-puff.webp"
+    },
+    {
+      "id": "falling-acorn",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/falling-acorn.webp"
+    },
+    {
+      "id": "favicon",
+      "kind": "ui",
+      "path": "/assets/icons/favicon.ico"
+    },
+    {
+      "id": "favicon-32",
+      "kind": "ui",
+      "path": "/assets/icons/favicon-32.png"
+    },
+    {
+      "id": "finale-eruption-plume",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-eruption-plume.png"
+    },
+    {
+      "id": "finale-husk-shard",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-husk-shard.png"
+    },
+    {
+      "id": "finale-popcorn-kernel",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-popcorn-kernel.png"
+    },
+    {
+      "id": "finale-popcorn-puff-a",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-popcorn-puff-a.png"
+    },
+    {
+      "id": "finale-popcorn-puff-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-popcorn-puff-b.png"
+    },
+    {
+      "id": "finale-popcorn-puff-c",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-popcorn-puff-c.png"
+    },
+    {
+      "id": "finale-popcorn-puff-d",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-popcorn-puff-d.png"
+    },
+    {
+      "id": "finale-volcano-cinematic",
+      "kind": "gameplay",
+      "path": "/assets/sprites/finale/finale-volcano-cinematic.png"
+    },
+    {
+      "id": "fred-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-fall.webp"
+    },
+    {
+      "id": "fred-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-hurt.webp"
+    },
+    {
+      "id": "fred-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-idle.webp"
+    },
+    {
+      "id": "fred-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-jump.webp"
+    },
+    {
+      "id": "fred-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-run.webp"
+    },
+    {
+      "id": "fred-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-run-b.webp"
+    },
+    {
+      "id": "fred-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fred/fred-swing.webp"
+    },
+    {
+      "id": "general-acorn-card",
+      "kind": "poster",
+      "path": "/assets/posters/general-acorn-card.png"
+    },
+    {
+      "id": "general-acorn-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/general-acorn/general-acorn-defeated.webp"
+    },
+    {
+      "id": "general-acorn-hurl",
+      "kind": "gameplay",
+      "path": "/assets/sprites/general-acorn/general-acorn-hurl.webp"
+    },
+    {
+      "id": "general-acorn-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/general-acorn/general-acorn-hurt.webp"
+    },
+    {
+      "id": "general-acorn-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/general-acorn/general-acorn-idle.webp"
+    },
+    {
+      "id": "good-cob-1",
+      "kind": "gameplay",
+      "path": "/assets/sprites/good-cob/good-cob-1.webp"
+    },
+    {
+      "id": "good-cob-2",
+      "kind": "gameplay",
+      "path": "/assets/sprites/good-cob/good-cob-2.webp"
+    },
+    {
+      "id": "good-cob-3",
+      "kind": "gameplay",
+      "path": "/assets/sprites/good-cob/good-cob-3.webp"
+    },
+    {
+      "id": "good-cob-4",
+      "kind": "gameplay",
+      "path": "/assets/sprites/good-cob/good-cob-4.webp"
+    },
+    {
+      "id": "izzy-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-fall.webp"
+    },
+    {
+      "id": "izzy-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-hurt.webp"
+    },
+    {
+      "id": "izzy-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-idle.webp"
+    },
+    {
+      "id": "izzy-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-jump.webp"
+    },
+    {
+      "id": "izzy-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-run.webp"
+    },
+    {
+      "id": "izzy-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-run-b.webp"
+    },
+    {
+      "id": "izzy-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/izzy/izzy-swing.webp"
+    },
+    {
+      "id": "kernel-creep-squished",
+      "kind": "gameplay",
+      "path": "/assets/sprites/kernel-creep/kernel-creep-squished.webp"
+    },
+    {
+      "id": "kernel-creep-turn",
+      "kind": "gameplay",
+      "path": "/assets/sprites/kernel-creep/kernel-creep-turn.webp"
+    },
+    {
+      "id": "kernel-creep-walk-a",
+      "kind": "gameplay",
+      "path": "/assets/sprites/kernel-creep/kernel-creep-walk-a.webp"
+    },
+    {
+      "id": "kernel-creep-walk-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/kernel-creep/kernel-creep-walk-b.webp"
+    },
+    {
+      "id": "king-corn-card",
+      "kind": "poster",
+      "path": "/assets/posters/king-corn-card.png"
+    },
+    {
+      "id": "king-corn-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/king-corn/king-corn-defeated.webp"
+    },
+    {
+      "id": "king-corn-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/king-corn/king-corn-hurt.webp"
+    },
+    {
+      "id": "king-corn-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/king-corn/king-corn-idle.webp"
+    },
+    {
+      "id": "king-corn-stride",
+      "kind": "gameplay",
+      "path": "/assets/sprites/king-corn/king-corn-stride.webp"
+    },
+    {
+      "id": "level-exit",
+      "kind": "gameplay",
+      "path": "/assets/sprites/level-exit/level-exit.webp"
+    },
+    {
+      "id": "luca-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-fall.webp"
+    },
+    {
+      "id": "luca-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-hurt.webp"
+    },
+    {
+      "id": "luca-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-idle.webp"
+    },
+    {
+      "id": "luca-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-jump.webp"
+    },
+    {
+      "id": "luca-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-run.webp"
+    },
+    {
+      "id": "luca-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-run-b.webp"
+    },
+    {
+      "id": "luca-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/luca/luca-swing.webp"
+    },
+    {
+      "id": "moving-platform",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/moving-platform.webp"
+    },
+    {
+      "id": "oneup-pickup",
+      "kind": "gameplay",
+      "path": "/assets/sprites/pickups/oneup-pickup.webp"
+    },
+    {
+      "id": "pep-pickup",
+      "kind": "gameplay",
+      "path": "/assets/sprites/pickups/pep-pickup.webp"
+    },
+    {
+      "id": "pepper-attack",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/pepper-attack.webp"
+    },
+    {
+      "id": "pepper-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/pepper-defeated.webp"
+    },
+    {
+      "id": "pepper-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/pepper-hurt.webp"
+    },
+    {
+      "id": "pepper-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/pepper-idle.webp"
+    },
+    {
+      "id": "ricochet-target",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/ricochet-target.webp"
+    },
+    {
+      "id": "root-gate",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/root-gate.webp"
+    },
+    {
+      "id": "root-switch",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/root-switch.webp"
+    },
+    {
+      "id": "rosa-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-fall.webp"
+    },
+    {
+      "id": "rosa-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-hurt.webp"
+    },
+    {
+      "id": "rosa-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-idle.webp"
+    },
+    {
+      "id": "rosa-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-jump.webp"
+    },
+    {
+      "id": "rosa-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-run.webp"
+    },
+    {
+      "id": "rosa-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-run-b.webp"
+    },
+    {
+      "id": "rosa-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/rosa/rosa-swing.webp"
+    },
+    {
+      "id": "salt-and-pepper-card",
+      "kind": "poster",
+      "path": "/assets/posters/salt-and-pepper-card.png"
+    },
+    {
+      "id": "salt-attack",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/salt-attack.webp"
+    },
+    {
+      "id": "salt-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/salt-defeated.webp"
+    },
+    {
+      "id": "salt-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/salt-hurt.webp"
+    },
+    {
+      "id": "salt-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/salt-and-pepper/salt-idle.webp"
+    },
+    {
+      "id": "sir-pickle-card",
+      "kind": "poster",
+      "path": "/assets/posters/sir-pickle-card.png"
+    },
+    {
+      "id": "sir-pickle-defeated",
+      "kind": "gameplay",
+      "path": "/assets/sprites/sir-pickle/sir-pickle-defeated.webp"
+    },
+    {
+      "id": "sir-pickle-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/sir-pickle/sir-pickle-hurt.webp"
+    },
+    {
+      "id": "sir-pickle-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/sir-pickle/sir-pickle-idle.webp"
+    },
+    {
+      "id": "sir-pickle-thrust",
+      "kind": "gameplay",
+      "path": "/assets/sprites/sir-pickle/sir-pickle-thrust.webp"
+    },
+    {
+      "id": "slick-board",
+      "kind": "gameplay",
+      "path": "/assets/sprites/mechanisms/slick-board.webp"
+    },
+    {
+      "id": "sparkle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/fx/sparkle.webp"
+    },
+    {
+      "id": "spiked-corn-1",
+      "kind": "gameplay",
+      "path": "/assets/sprites/spiked-corn/spiked-corn-1.webp"
+    },
+    {
+      "id": "spiked-corn-2",
+      "kind": "gameplay",
+      "path": "/assets/sprites/spiked-corn/spiked-corn-2.webp"
+    },
+    {
+      "id": "spiked-corn-3",
+      "kind": "gameplay",
+      "path": "/assets/sprites/spiked-corn/spiked-corn-3.webp"
+    },
+    {
+      "id": "spiked-corn-4",
+      "kind": "gameplay",
+      "path": "/assets/sprites/spiked-corn/spiked-corn-4.webp"
+    },
+    {
+      "id": "squirrel-squished",
+      "kind": "gameplay",
+      "path": "/assets/sprites/squirrel/squirrel-squished.webp"
+    },
+    {
+      "id": "squirrel-throw",
+      "kind": "gameplay",
+      "path": "/assets/sprites/squirrel/squirrel-throw.webp"
+    },
+    {
+      "id": "squirrel-walk-a",
+      "kind": "gameplay",
+      "path": "/assets/sprites/squirrel/squirrel-walk-a.webp"
+    },
+    {
+      "id": "squirrel-walk-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/squirrel/squirrel-walk-b.webp"
+    },
+    {
+      "id": "squirrel-windup",
+      "kind": "gameplay",
+      "path": "/assets/sprites/squirrel/squirrel-windup.webp"
+    },
+    {
+      "id": "theo-fall",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-fall.webp"
+    },
+    {
+      "id": "theo-hurt",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-hurt.webp"
+    },
+    {
+      "id": "theo-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-idle.webp"
+    },
+    {
+      "id": "theo-jump",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-jump.webp"
+    },
+    {
+      "id": "theo-run",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-run.webp"
+    },
+    {
+      "id": "theo-run-b",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-run-b.webp"
+    },
+    {
+      "id": "theo-swing",
+      "kind": "gameplay",
+      "path": "/assets/sprites/theo/theo-swing.webp"
+    },
+    {
+      "id": "thresher-1",
+      "kind": "gameplay",
+      "path": "/assets/sprites/thresher/thresher-1.webp"
+    },
+    {
+      "id": "thresher-2",
+      "kind": "gameplay",
+      "path": "/assets/sprites/thresher/thresher-2.webp"
+    },
+    {
+      "id": "thresher-3",
+      "kind": "gameplay",
+      "path": "/assets/sprites/thresher/thresher-3.webp"
+    },
+    {
+      "id": "thresher-4",
+      "kind": "gameplay",
+      "path": "/assets/sprites/thresher/thresher-4.webp"
+    },
+    {
+      "id": "title-splash",
+      "kind": "poster",
+      "path": "/assets/posters/title-splash.png"
+    },
+    {
+      "id": "wheat-box-burst",
+      "kind": "gameplay",
+      "path": "/assets/sprites/wheat-box/wheat-box-burst.webp"
+    },
+    {
+      "id": "wheat-box-glint",
+      "kind": "gameplay",
+      "path": "/assets/sprites/wheat-box/wheat-box-glint.webp"
+    },
+    {
+      "id": "wheat-box-idle",
+      "kind": "gameplay",
+      "path": "/assets/sprites/wheat-box/wheat-box-idle.webp"
+    },
+    {
+      "id": "wheat-box-squash",
+      "kind": "gameplay",
+      "path": "/assets/sprites/wheat-box/wheat-box-squash.webp"
+    },
+    {
+      "id": "world1-bg-far",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world1-bg-far.png"
+    },
+    {
+      "id": "world1-bg-mid",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world1-bg-mid.png"
+    },
+    {
+      "id": "world1-bg-near",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world1-bg-near.png"
+    },
+    {
+      "id": "world1-tileset",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world1-tileset.png"
+    },
+    {
+      "id": "world2-bg-far",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world2-bg-far.png"
+    },
+    {
+      "id": "world2-bg-mid",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world2-bg-mid.png"
+    },
+    {
+      "id": "world2-bg-near",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world2-bg-near.png"
+    },
+    {
+      "id": "world2-tileset",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world2-tileset.png"
+    },
+    {
+      "id": "world3-bg-far",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world3-bg-far.png"
+    },
+    {
+      "id": "world3-bg-mid",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world3-bg-mid.png"
+    },
+    {
+      "id": "world3-bg-near",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world3-bg-near.png"
+    },
+    {
+      "id": "world3-tileset",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world3-tileset.png"
+    },
+    {
+      "id": "world4-bg-far",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world4-bg-far.png"
+    },
+    {
+      "id": "world4-bg-mid",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world4-bg-mid.png"
+    },
+    {
+      "id": "world4-bg-near",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world4-bg-near.png"
+    },
+    {
+      "id": "world4-tileset",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world4-tileset.png"
+    },
+    {
+      "id": "world5-bg-far",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world5-bg-far.png"
+    },
+    {
+      "id": "world5-bg-mid",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world5-bg-mid.png"
+    },
+    {
+      "id": "world5-bg-near",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world5-bg-near.png"
+    },
+    {
+      "id": "world5-tileset",
+      "kind": "gameplay",
+      "path": "/assets/sprites/world5-tileset.png"
+    }
+  ]
+}

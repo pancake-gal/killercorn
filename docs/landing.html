@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KILLER CORN | The corn has gone bad.</title>
+<meta name="description" content="KILLER CORN is a free browser arcade adventure with five food worlds, permanent crew powers, local high scores, a spectacular popcorn finish, and a post-game Boss Royale.">
+<meta property="og:title" content="KILLER CORN">
+<meta property="og:description" content="The corn has gone bad. Rescue the crew, master five wild fields, and mash it back to normal. Then every boss wants a rematch in Boss Royale. Free in your browser.">
+<meta property="og:image" content="media/social-card.webp">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="KILLER CORN: a farm kid faces the crowned Corn King across a cornfield.">
+<meta name="theme-color" content="#1a1320">
+<link rel="icon" href="media/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" href="media/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="media/apple-touch-icon.png" sizes="180x180">
+<link rel="preload" as="image" href="media/title-splash.webp">
+<style>
+  /* ============ base ============ */
+  :root {
+    --font-display: "Cooper Black", "Rockwell Extra Bold", Impact, sans-serif;
+    --font-body: "Avenir Next", "Trebuchet MS", Verdana, sans-serif;
+    --ink: #1a1320;
+    --cream: #fff6dd;
+    --paper: #fffdf4;
+    --corn: #ffcf4d;
+    --corn-dark: #7a4a12;
+    --danger: #e23a3a;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html, body { margin: 0; padding: 0; overflow-x: clip; }
+  body {
+    font-family: var(--font-body);
+    font-size: 1.06rem;
+    line-height: 1.55;
+    color: #2b2118;
+    background: #7ec8ff;
+  }
+  img { max-width: 100%; height: auto; display: block; }
+  .px { image-rendering: pixelated; }
+  h1, h2, .display {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 950;
+    letter-spacing: -.045em;
+    text-transform: uppercase;
+    text-wrap: balance;
+  }
+  h3, .chunky { font-family: var(--font-display); text-wrap: balance; }
+  p { text-wrap: pretty; }
+  section { position: relative; }
+  section[id], [id].hero-cta { scroll-margin-top: 24px; }
+  a, button { touch-action: manipulation; -webkit-tap-highlight-color: rgba(255, 207, 77, .22); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  /* Two-tone ring (cream, navy, cream) so focus shows on the dark and the light sections alike. */
+  a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid #143a63; outline-offset: 3px; border-radius: 8px;
+    box-shadow: 0 0 0 9px #fff8dc;
+  }
+  .play-btn:focus-visible { box-shadow: 0 8px 0 var(--corn-dark), 0 0 0 9px #fff8dc; }
+  .visually-hidden {
+    position: absolute; width: 1px; height: 1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap;
+  }
+  .skip {
+    position: fixed; top: 10px; left: 10px; z-index: 100;
+    transform: translateY(-200%);
+    background: #fffdf4; color: #143a63; font-weight: 800;
+    font-family: var(--font-body); text-decoration: none;
+    border: 3px solid #143a63; border-radius: 12px; padding: .5em 1em;
+  }
+  .skip:focus-visible { transform: none; }
+
+  /* ============ harvest-sign navigation ============ */
+  .site-nav {
+    position: relative; z-index: 5;
+    width: min(1120px, calc(100% - 24px));
+    margin: 0 auto clamp(18px, 3vh, 34px);
+    display: flex; align-items: center; justify-content: space-between; gap: 18px;
+    color: #fff8dc;
+    background: rgba(26, 19, 32, .9);
+    border: 2px solid rgba(255, 239, 181, .65);
+    border-radius: 16px;
+    box-shadow: 0 8px 0 rgba(11, 8, 15, .68), 0 18px 36px rgba(7, 9, 18, .34);
+    padding: 9px 11px 9px 18px;
+    backdrop-filter: blur(9px);
+  }
+  .nav-brand {
+    color: var(--corn); text-decoration: none; white-space: nowrap;
+    font-family: var(--font-display); font-weight: 950; letter-spacing: -.03em;
+    text-shadow: 0 2px 0 #7a4a12;
+  }
+  .nav-links { display: flex; align-items: center; justify-content: flex-end; gap: 2px; }
+  .nav-links a {
+    color: #fff8dc; text-decoration: none; font-weight: 850; font-size: .92rem;
+    border-radius: 10px; padding: .55em .72em;
+  }
+  .nav-links a:hover { color: #1a1320; background: #fff1bd; }
+  .nav-links .nav-play { color: #4e240b; background: var(--corn); border: 2px solid #8a4a12; margin-left: 7px; }
+  /* Phones keep the two links a scroller cannot easily reach: the rematch mode and the grown-up facts. */
+  @media (max-width: 760px) {
+    .site-nav { padding-left: 14px; }
+    .nav-links a:not(.nav-play, .nav-keep) { display: none; }
+    .nav-links a { font-size: .86rem; padding: .62em .55em; }
+    .nav-links .nav-play { margin-left: 4px; }
+    .nav-long { display: none; }
+  }
+  @media (max-width: 520px) {
+    .nav-brand { display: none; }
+    .site-nav { justify-content: center; padding-left: 9px; }
+  }
+
+  /* ============ big play button ============ */
+  .play-btn {
+    position: relative;
+    display: inline-flex; align-items: center; gap: .45em;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 3vw, 2.15rem);
+    font-weight: 950;
+    letter-spacing: -.02em;
+    text-transform: uppercase;
+    color: #5a2b0e;
+    text-decoration: none;
+    background: linear-gradient(180deg, #ffe27a 0%, #ffcf4d 55%, #f5b118 100%);
+    border: 4px solid var(--corn-dark);
+    border-radius: 18px;
+    padding: .62em 1.25em .55em;
+    box-shadow: 0 8px 0 var(--corn-dark), 0 18px 30px rgba(20, 10, 0, .35);
+    transform: translateY(0);
+    transition: transform .15s cubic-bezier(.34,1.56,.64,1), box-shadow .15s ease;
+    white-space: nowrap;
+  }
+  .play-btn:hover { transform: translateY(2px) scale(1.02); box-shadow: 0 6px 0 var(--corn-dark), 0 12px 22px rgba(20,10,0,.35); }
+  .play-btn:active { transform: translateY(6px) scale(.96); box-shadow: 0 2px 0 var(--corn-dark), 0 6px 12px rgba(20,10,0,.35); }
+  .play-btn .tri { margin-left: 2px; font-family: var(--font-body); font-size: .75em; transform: translateY(-.04em); }
+
+  /* floating quick-play pill */
+  .pill-play {
+    position: fixed; right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); z-index: 60;
+    font-size: 1.05rem; padding: .55em .9em .48em; border-width: 3px; border-radius: 14px;
+    box-shadow: 0 6px 0 #7a4a12, 0 12px 20px rgba(20,10,0,.35);
+    /* hidden also means out of the tab order, not just transparent */
+    opacity: 0; pointer-events: none; translate: 0 12px; visibility: hidden;
+    transition: opacity .25s ease, translate .25s ease, visibility 0s linear .25s;
+  }
+  .pill-play.show { opacity: 1; pointer-events: auto; translate: 0 0; visibility: visible; transition-delay: 0s; }
+
+  /* ============ hero ============ */
+  .hero {
+    position: relative; /* anchor the scroll hint, kernels, and Fred to the hero, not the first screen */
+    min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    text-align: center;
+    background:
+      linear-gradient(180deg, rgba(8,18,38,.10) 0%, rgba(8,18,38,0) 30%, rgba(26,19,32,0) 72%, rgba(26,19,32,.30) 88%, rgba(26,19,32,.96) 100%),
+      url("media/title-splash.webp") center bottom / cover no-repeat,
+      linear-gradient(180deg, #7ec8ff, #4aa3f0);
+    overflow: clip;
+    padding: max(14px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) 90px max(20px, env(safe-area-inset-left));
+  }
+  .hero-inner {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    width: min(760px, 100%);
+    background: radial-gradient(ellipse 62% 58% at 50% 42%, rgba(10,22,44,.5), rgba(10,22,44,0) 74%);
+    padding: 8px 34px 38px;
+    border-radius: 40px;
+  }
+  .hero-badge {
+    margin: 0 0 10px;
+    padding: .38em .8em .32em;
+    border: 2px solid rgba(255, 246, 216, .7);
+    border-radius: 7px;
+    background: rgba(26, 19, 32, .76);
+    color: #ffe9b0;
+    font-family: var(--font-display);
+    font-size: clamp(.8rem, 1.5vw, .9rem);
+    font-weight: 950;
+    letter-spacing: .08em;
+    line-height: 1;
+    text-transform: uppercase;
+    transform: rotate(-1deg);
+  }
+  .wordmark {
+    font-size: clamp(3.15rem, 8.8vw, 7rem);
+    line-height: .86;
+    letter-spacing: -.075em;
+    color: var(--corn);
+    -webkit-text-stroke: 2px #5a2b0e;
+    text-shadow:
+      0 4px 0 #8a4a12,
+      0 8px 0 rgba(90,43,14,.85),
+      0 16px 36px rgba(0,0,0,.5);
+    transform: rotate(-2deg);
+    margin: 0 0 20px;
+  }
+  .tagline {
+    display: inline-block;
+    font-family: var(--font-display); font-weight: 950;
+    font-size: clamp(1.15rem, 2.4vw, 1.6rem);
+    color: #fff6d8;
+    background: #c92f2f;
+    border: 3px solid #8f1f1f;
+    border-radius: 9px;
+    padding: .3em .95em .34em;
+    transform: rotate(1.6deg);
+    box-shadow: 0 5px 0 #8f1f1f, 0 10px 24px rgba(0,0,0,.35);
+    margin: 0 0 20px;
+  }
+  .pitch {
+    max-width: 40ch;
+    font-weight: 800;
+    font-size: clamp(1.02rem, 2vw, 1.25rem);
+    color: #fffdf4;
+    text-shadow: 0 2px 6px rgba(8,18,38,.85), 0 0 22px rgba(8,18,38,.6);
+    margin: 0 0 34px;
+  }
+  .hero-cta { position: relative; }
+  .hero-micro {
+    margin: 22px 0 0;
+    font-weight: 700;
+    color: #ffe9b0;
+    text-shadow: 0 2px 5px rgba(8,18,38,.9);
+  }
+  .hero-trust {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 18px;
+    list-style: none; margin: 14px 0 0; padding: 0;
+    color: #fff6d8; font-weight: 850; font-size: .9rem;
+    text-shadow: 0 2px 5px rgba(8,18,38,.9);
+  }
+  .hero-trust li::before { content: "✓"; color: #b9f46c; font-weight: 950; margin-right: 6px; }
+  .scroll-hint {
+    position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%);
+    z-index: 2;
+    color: #fff6d8; text-decoration: none; font-weight: 800; font-family: var(--font-body);
+    text-shadow: 0 2px 6px rgba(8,18,38,.9);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .scroll-hint .chev { font-size: 1.5rem; line-height: 1; }
+  .scroll-hint:hover { color: #ffdf74; }
+  .hero-fred { display: none; }
+  @media (max-width: 700px) {
+    /* The splash crops Fred out on phones; bring him back so a kid sees who they play. */
+    .hero-fred { display: block; position: absolute; left: 6px; bottom: 6px; z-index: 1; width: 78px; filter: drop-shadow(0 6px 0 rgba(0,0,0,.35)); }
+    /* layer order: scrim gradient, splash art, sky gradient */
+    .hero { background-position: center bottom, 68% bottom, center; }
+    .hero-inner { padding: 2px 8px 38px; }
+    .wordmark span { display: block; }
+    .wordmark { font-size: clamp(3.7rem, 18vw, 5.2rem); line-height: .82; margin-bottom: 18px; }
+    .tagline { font-size: 1.05rem; }
+    .pitch { max-width: 31ch; margin-bottom: 28px; }
+    .scroll-hint { display: none; }
+    .hero { padding-bottom: 34px; }
+  }
+
+  /* hero kernels (decorative) */
+  .kernels { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .kernel {
+    position: absolute; bottom: -30px; left: var(--x);
+    width: var(--s); height: calc(var(--s) * 1.25);
+    background: radial-gradient(circle at 35% 30%, #ffefad, #f5c518 60%, #d99a0b);
+    border: 2px solid rgba(122, 74, 18, .55);
+    border-radius: 46% 46% 54% 54%;
+    opacity: 0;
+  }
+
+  /* ============ section dividers ============ */
+  .divider { display: block; width: 100%; height: 58px; margin-bottom: -1px; }
+
+  /* ============ shared section styles ============ */
+  .sect { padding: 64px 0 84px; }
+  .sect-head { text-align: center; margin-bottom: 44px; }
+  .sect-head h2 {
+    font-size: clamp(2.1rem, 5vw, 3.4rem);
+    transform: rotate(-1deg);
+    line-height: 1;
+    letter-spacing: -.055em;
+    margin: 0 0 12px;
+  }
+  .sect-head .sub {
+    font-family: var(--font-body); font-weight: 800;
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+    margin: 0;
+  }
+  .card {
+    background: #fffdf4;
+    border: 2px solid rgba(61, 43, 28, .68);
+    border-radius: 18px;
+    box-shadow: 0 7px 0 rgba(61, 43, 28, .28), 0 14px 30px rgba(61, 43, 28, .09);
+  }
+
+  /* ============ how to play ============ */
+  .howto { background: #eaf7ff; }
+  .howto h2 { color: #1c6dc4; text-shadow: 0 3px 0 rgba(28,109,196,.18); }
+  .howto .sub { color: #37576f; }
+  .howto-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;
+  }
+  .howto-card { padding: 26px 22px 24px; text-align: center; }
+  .howto-card h3 { font-size: 1.5rem; font-weight: 800; color: #1c6dc4; margin: 0 0 6px; }
+  .howto-card p { margin: 0 0 14px; color: #37475a; font-weight: 600; }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  kbd {
+    font-family: var(--font-body); font-weight: 800; font-size: .95rem;
+    color: #2b2118; background: linear-gradient(180deg, #ffffff, #e8eef4);
+    border: 2.5px solid #9db2c4; border-bottom-width: 5px; border-radius: 10px;
+    padding: .22em .65em; min-width: 2.2em; text-align: center; display: inline-block;
+  }
+  .goal-ribbon {
+    margin-top: 34px;
+    display: flex; align-items: center; justify-content: center; gap: 18px; flex-wrap: wrap;
+    background: linear-gradient(180deg, #ffe27a, #ffcf4d);
+    border: 3px solid #b8860b; border-radius: 20px;
+    box-shadow: 0 7px 0 rgba(122, 74, 18, .35);
+    padding: 18px 26px;
+    text-align: center;
+  }
+  .goal-ribbon img { width: 64px; height: auto; flex: none; }
+  .goal-ribbon p {
+    margin: 0; font-family: var(--font-display); font-weight: 950;
+    font-size: clamp(1.1rem, 2.4vw, 1.45rem); color: #5a2b0e;
+  }
+  .field-guide {
+    margin-top: 30px;
+    display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+  }
+  .guide-chip {
+    display: flex; align-items: center; gap: 12px;
+    background: #fffdf4; border: 3px solid rgba(90,43,14,.16); border-radius: 999px;
+    box-shadow: 0 5px 0 rgba(90,43,14,.12);
+    padding: 10px 22px 10px 12px;
+  }
+  .guide-chip img { width: 46px; height: 46px; object-fit: contain; }
+  .guide-chip b { font-family: var(--font-display); font-weight: 950; color: #2b2118; display: block; line-height: 1.15; }
+  .guide-chip span { color: #5c6f81; font-weight: 700; font-size: .92rem; }
+  .squirrel-warning {
+    margin: 34px auto 0; max-width: 620px;
+    display: flex; align-items: center; gap: 20px;
+    background: #fff3f0; border: 3px dashed #e23a3a; border-radius: 20px;
+    padding: 16px 22px;
+  }
+  .squirrel-warning img { width: 150px; flex: none; }
+  .squirrel-warning p { margin: 0; font-weight: 700; color: #7c2a1d; }
+  .squirrel-warning p b { font-family: var(--font-display); font-size: 1.12rem; display: block; color: #b3271a; }
+  @media (max-width: 860px) { .howto-grid { grid-template-columns: 1fr; max-width: 460px; margin: 0 auto; } }
+  /* ============ real gameplay ============ */
+  .gameplay { background: #1a1320; color: #efe4cf; padding-top: 40px; }
+  .gameplay h2 { color: #ffcf4d; text-shadow: 0 4px 0 rgba(0,0,0,.55); }
+  .gameplay .sub { color: #cbb9d8; }
+  .shot-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; max-width: 1240px; margin: 0 auto; padding: 4px 24px 8px; }
+  .shot { margin: 0; }
+  .shot img { width: 100%; border-radius: 14px; border: 3px solid #4a3562; box-shadow: 0 8px 0 rgba(0,0,0,.4); }
+  .shot figcaption { margin-top: 10px; text-align: center; color: #fff2c8; font-weight: 800; }
+  @media (max-width: 860px) {
+    .shot-row { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding-bottom: 16px; }
+    .shot { flex: 0 0 min(84vw, 520px); scroll-snap-align: center; }
+  }
+  .pad-note { max-width: 62ch; margin: 22px auto 0; text-align: center; color: #24557e; font-weight: 700; }
+  .pad-note b { color: #143a63; }
+  @media (max-width: 560px) { .squirrel-warning { flex-direction: column; text-align: center; } }
+
+  /* ============ five-world field guide ============ */
+  .worlds {
+    color: #f9efdb;
+    background:
+      radial-gradient(circle at 8% 8%, rgba(255, 207, 77, .17), transparent 26%),
+      radial-gradient(circle at 92% 4%, rgba(160, 116, 214, .2), transparent 28%),
+      #1a1320;
+    overflow: clip;
+  }
+  .worlds h2 { color: #ffcf4d; text-shadow: 0 4px 0 #6c3c0c; }
+  .worlds .sub { color: #dccdea; }
+  .world-stack { display: grid; gap: 24px; }
+  .world-card {
+    --world-accent: #ffcf4d;
+    display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(270px, .85fr);
+    min-height: 270px;
+    overflow: hidden;
+    background: #261d30;
+    border: 3px solid color-mix(in srgb, var(--world-accent) 62%, #fff 8%);
+    border-radius: 24px;
+    box-shadow: 0 10px 0 rgba(0,0,0,.38), 0 26px 50px rgba(0,0,0,.18);
+  }
+  .world-card:nth-child(even) { grid-template-columns: minmax(270px, .85fr) minmax(0, 1.55fr); }
+  .world-card:nth-child(even) .world-shot { order: 2; }
+  .world-shot { position: relative; min-height: 270px; margin: 0; overflow: hidden; background: #4e7280; }
+  .world-shot::after {
+    content: "ACTUAL GAME ART";
+    position: absolute; left: 14px; bottom: 13px;
+    color: #fff9e5; background: rgba(26,19,32,.86); border: 2px solid rgba(255,255,255,.55);
+    border-radius: 7px; padding: .32em .7em;
+    font-family: var(--font-display); font-size: .68rem; font-weight: 950; letter-spacing: .08em;
+  }
+  .world-shot > img:first-child { width: 100%; height: 100%; min-height: 270px; object-fit: cover; image-rendering: pixelated; }
+  .mechanic-sprite {
+    position: absolute; right: 18px; bottom: 16px; z-index: 2;
+    width: auto; height: 66px; max-width: 130px; object-fit: contain;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 5px 0 rgba(26,19,32,.65));
+  }
+  .mechanic-sprite.secondary { right: 112px; height: 52px; }
+  .world-copy { align-self: stretch; display: flex; flex-direction: column; justify-content: center; padding: 26px 28px 28px; }
+  .world-kicker {
+    color: var(--world-accent); margin: 0 0 5px;
+    font-family: var(--font-display); font-size: .78rem; font-weight: 950; letter-spacing: .12em;
+    text-transform: uppercase;
+  }
+  .world-copy h3 {
+    color: #fff8e8; font-family: var(--font-display); font-size: clamp(1.6rem, 3vw, 2.35rem);
+    letter-spacing: -.04em; line-height: 1; text-transform: uppercase; margin: 0 0 10px;
+  }
+  .world-copy p { color: #d8cbe0; font-weight: 700; margin: 0 0 16px; }
+  .verb-list { display: flex; flex-wrap: wrap; gap: 7px; list-style: none; margin: auto 0 0; padding: 0; }
+  .verb-list li {
+    color: #1a1320; background: var(--world-accent); border-radius: 999px;
+    padding: .32em .7em; font-weight: 900; font-size: .78rem;
+  }
+  .world-card.w2 { --world-accent: #ff9e45; }
+  .world-card.w3 { --world-accent: #b9a2ff; }
+  .world-card.w4 { --world-accent: #b9e4d7; }
+  .world-card.w5 { --world-accent: #ffc45b; }
+  .world-note {
+    max-width: 74ch; margin: 34px auto 0; color: #e9dcf2; text-align: center; font-weight: 750;
+    background: rgba(255,255,255,.06); border: 2px dashed rgba(255,207,77,.44); border-radius: 16px; padding: 16px 20px;
+  }
+  @media (max-width: 820px) {
+    .world-card, .world-card:nth-child(even) { grid-template-columns: 1fr; }
+    .world-card:nth-child(even) .world-shot { order: 0; }
+    .world-shot, .world-shot > img:first-child { min-height: 220px; }
+  }
+
+  /* ============ farmers ============ */
+  .farmers { background: #fff6e3; }
+  .farmers h2 { color: #a85a00; text-shadow: 0 3px 0 rgba(122,74,18,.18); }
+  .farmers .sub { color: #7a5a34; }
+  .farmer-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; max-width: 900px; margin: 0 auto; }
+  .farmer-card {
+    text-align: center; padding: 26px 16px 22px;
+    transition: transform .18s cubic-bezier(.34,1.56,.64,1), box-shadow .18s ease;
+  }
+  .farmer-card:hover {
+    transform: translateY(-6px) scale(1.04);
+    box-shadow: 0 12px 0 rgba(90,43,14,.14), 0 0 0 4px #ffcf4d, 0 16px 34px rgba(217,130,11,.25);
+  }
+  .farmer-card .sprite-box { height: 168px; display: flex; align-items: flex-end; justify-content: center; margin-bottom: 14px; }
+  .farmer-card img { height: 158px; width: auto; }
+  .farmer-card h3 { font-family: var(--font-display); font-weight: 950; font-size: 1.5rem; color: #b96a00; margin: 0 0 4px; letter-spacing: -.03em; text-transform: uppercase; }
+  .farmer-card p { margin: 0; font-weight: 700; color: #6b543a; font-size: .98rem; }
+  .farmer-card.unlock { position: relative; background: linear-gradient(180deg, #fff3c9, #fffdf4 46%); border-color: #c98a17; }
+  .unlock-ribbon {
+    position: absolute; top: 12px; left: -6px; z-index: 2;
+    color: #fff8e4; background: #b3271a; border: 2px solid #6e150c; border-radius: 8px;
+    padding: .26em .62em; font-family: var(--font-display); font-size: .8rem; font-weight: 950;
+    letter-spacing: .05em; text-transform: uppercase; transform: rotate(-4deg);
+    box-shadow: 0 4px 0 rgba(110, 21, 12, .45);
+  }
+  @media (max-width: 900px) { .farmer-grid { grid-template-columns: repeat(2, 1fr); max-width: 560px; } }
+  /* Two across even on small phones: six stacked kids made the page twice as long. */
+  @media (max-width: 480px) {
+    .farmer-grid { gap: 14px; }
+    .farmer-card { padding: 30px 8px 16px; }
+    .farmer-card .sprite-box { height: 122px; }
+    .farmer-card img { height: 112px; }
+    .farmer-card h3 { font-size: 1.25rem; }
+    .farmer-card p { font-size: .9rem; }
+  }
+
+  /* ============ rogues gallery ============ */
+  .gallery { background: #1a1320; color: #efe4cf; overflow: clip; }
+  .gallery h2 { color: #ffcf4d; text-shadow: 0 4px 0 rgba(0,0,0,.55); }
+  .gallery .sub { color: #cbb9d8; }
+  .gallery::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 55% 34% at 18% 4%, rgba(157,113,220,.28), transparent 70%),
+      radial-gradient(ellipse 48% 30% at 84% 8%, rgba(226,58,58,.14), transparent 70%);
+    opacity: .55;
+  }
+  .marquee { position: relative; overflow: hidden; padding: 6px 24px 14px; }
+  .marquee-track { display: grid; grid-template-columns: repeat(5, minmax(210px, 1fr)); gap: 20px; width: min(1380px, 100%); margin: 0 auto; }
+  .rogue-card {
+    position: relative; min-width: 0;
+    background: #241a30;
+    border: 3px solid #4a3562;
+    border-radius: 20px;
+    box-shadow: 0 10px 0 rgba(0,0,0,.4);
+    overflow: hidden;
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1), box-shadow .2s ease, border-color .2s ease;
+  }
+  .rogue-card:hover {
+    transform: translateY(-10px) rotate(-1.6deg) scale(1.03);
+    border-color: #ffcf4d;
+    box-shadow: 0 14px 0 rgba(0,0,0,.4), 0 22px 44px rgba(157,113,220,.3);
+  }
+  .rogue-card img { width: 100%; height: auto; }
+  .rogue-card img, .polaroid img {
+    outline: 1px solid rgba(255,255,255,.12);
+    outline-offset: -1px;
+  }
+  .rogue-plate { padding: 14px 16px 16px; }
+  .rogue-plate h3 { font-family: var(--font-display); font-weight: 950; font-size: 1.3rem; color: #ffcf4d; margin: 0 0 4px; letter-spacing: -.025em; text-transform: uppercase; }
+  .rogue-plate p { margin: 0; font-weight: 700; color: #cbb9d8; font-size: .95rem; }
+  .stamp {
+    position: absolute; top: 14px; right: -6px; z-index: 2;
+    font-family: var(--font-display); font-weight: 950; font-size: .84rem;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: #ffd9d0; background: rgba(26, 19, 32, .82);
+    border: 2.5px solid #e23a3a; border-radius: 10px;
+    padding: .28em .7em;
+    transform: rotate(6deg);
+    transition: transform .2s cubic-bezier(.34,1.56,.64,1);
+  }
+  .rogue-card:hover .stamp { transform: rotate(-3deg) scale(1.12); }
+  .gallery-note { text-align: center; margin: 26px 0 0; color: #a892bd; font-weight: 700; }
+  @media (max-width: 1120px) { .marquee-track { grid-template-columns: repeat(3, minmax(210px, 1fr)); } }
+  /* Phones swipe the bosses sideways instead of scrolling past five stacked posters. */
+  @media (max-width: 720px) {
+    .marquee { overflow-x: auto; scroll-snap-type: x mandatory; overscroll-behavior-x: contain; padding: 12px 24px 22px; }
+    .marquee-track { display: flex; gap: 14px; width: max-content; }
+    .rogue-card { flex: 0 0 min(66vw, 250px); scroll-snap-align: center; }
+    .rogue-card:hover { transform: none; }
+    .swipe-hint { display: block; }
+  }
+  .swipe-hint { display: none; margin: 0; text-align: center; color: #cbb9d8; font-weight: 800; font-size: .92rem; }
+  .royale-teaser { margin: 18px auto 0; text-align: center; }
+  .royale-teaser a {
+    display: inline-block; padding: .55em 1.1em; border-radius: 999px;
+    color: #2a1406; background: linear-gradient(180deg, #fff083, #ffba21); border: 3px solid #9b4f08;
+    box-shadow: 0 5px 0 #743705; font-family: var(--font-display); font-weight: 950; text-decoration: none;
+    letter-spacing: .02em; text-transform: uppercase; transform: rotate(-1deg);
+  }
+  .royale-teaser a:hover { background: #fff3b0; }
+
+  /* ============ rescue ============ */
+  .rescue { background: #eef9e8; }
+  .rescue h2 { color: #2e8b1f; text-shadow: 0 3px 0 rgba(46,139,31,.16); }
+  .rescue .sub { color: #4a6b42; }
+  .rescue-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .rescue-card { text-align: center; padding: 22px 12px 20px; }
+  .rescue-card .sprite-box {
+    position: relative; height: 128px;
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+  }
+  .rescue-card .sprite-box .buddy { max-height: 118px; width: auto; max-width: 88%; object-fit: contain; position: relative; z-index: 1; }
+  .rescue-card .sprite-box .spark {
+    position: absolute; width: 46px; height: 46px; z-index: 0;
+    top: 4px; right: 12%;
+  }
+  .rescue-card h3 { font-weight: 800; font-size: 1.2rem; color: #2b2118; margin: 0 0 8px; }
+  .power-chip {
+    display: inline-block; font-family: var(--font-display); font-weight: 950;
+    font-size: .85rem; letter-spacing: .07em;
+    color: #fffdf4; background: #256b1f; border-radius: 999px;
+    padding: .28em .95em; margin-bottom: 8px;
+  }
+  .rescue-card small { display: block; color: #5f7257; font-weight: 700; font-size: .92rem; }
+  @media (max-width: 980px) { .rescue-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 640px) { .rescue-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 400px) { .rescue-grid { grid-template-columns: 1fr; max-width: 260px; margin: 0 auto; } }
+
+  /* ============ score chase ============ */
+  .scores { background: #fff0c5; overflow: clip; }
+  .scores h2 { color: #b3271a; text-shadow: 0 3px 0 rgba(179,39,26,.14); }
+  .scores .sub { color: #704125; }
+  .score-layout { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(300px, .98fr); gap: 32px; align-items: stretch; }
+  .score-copy { padding: 10px 0; }
+  .score-copy h3 { color: #5b2b10; font-family: var(--font-display); font-size: clamp(1.7rem, 3vw, 2.4rem); line-height: 1.05; margin: 0 0 15px; text-transform: uppercase; }
+  .score-copy > p { color: #603e25; font-weight: 700; max-width: 55ch; }
+  .goal-stamps { display: flex; flex-wrap: wrap; gap: 10px; list-style: none; margin: 24px 0 0; padding: 0; }
+  .goal-stamps li {
+    color: #fff8e8; background: #2f6f33; border: 2px solid #17451a; border-radius: 10px;
+    box-shadow: 0 4px 0 #17451a; padding: .45em .72em; font-family: var(--font-display); font-size: .8rem; font-weight: 950;
+    letter-spacing: .03em; text-transform: uppercase; transform: rotate(var(--tilt, -1deg));
+  }
+  .music-note {
+    margin-top: 27px; padding: 16px 18px 16px 58px; position: relative;
+    color: #36231a; background: rgba(255,255,255,.56); border: 2px dashed #b87223; border-radius: 14px;
+  }
+  .music-note::before { content: "♫"; position: absolute; left: 18px; top: 11px; color: #b3271a; font-size: 2rem; font-weight: 950; }
+  .arcade-board {
+    color: #f9f0ff; background: #20152c; border: 6px solid #5c3878; border-radius: 24px;
+    box-shadow: 0 10px 0 #3b244e, inset 0 0 32px rgba(190,128,255,.1), 0 24px 44px rgba(83,46,23,.22);
+    padding: 22px clamp(18px, 4vw, 30px) 26px;
+  }
+  .new-best {
+    width: max-content; max-width: 100%; margin: -7px auto 18px;
+    color: #34170b; background: linear-gradient(#fff083, #ffba21); border: 3px solid #9b4f08; border-radius: 8px;
+    box-shadow: 0 5px 0 #743705; padding: .4em .85em;
+    font-family: var(--font-display); font-weight: 950; letter-spacing: .05em; text-align: center; transform: rotate(-1.2deg);
+  }
+  .arcade-board table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+  .arcade-board caption { color: #d7bbf0; font-weight: 850; margin-bottom: 9px; }
+  .arcade-board th, .arcade-board td { padding: 9px 7px; border-bottom: 1px solid #543769; text-align: left; }
+  .arcade-board th { color: #ffdc71; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; }
+  .arcade-board td:last-child, .arcade-board th:last-child { text-align: right; }
+  .arcade-board tbody tr:first-child { color: #fff2a8; font-weight: 950; }
+  .local-score-note { margin: 17px 0 0; color: #cbb9d8; font-size: .9rem; text-align: center; }
+  @media (max-width: 820px) { .score-layout { grid-template-columns: 1fr; } }
+
+  /* ============ popcorn finale tease ============ */
+  .ending {
+    color: #fff2d5; text-align: center; overflow: clip;
+    background:
+      radial-gradient(ellipse 55% 55% at 50% 85%, rgba(255,181,43,.42), transparent 64%),
+      radial-gradient(circle at 18% 14%, rgba(154,85,201,.32), transparent 30%),
+      #1b1025;
+  }
+  .ending .sect-head { position: relative; z-index: 2; }
+  .ending h2 { color: #ffce4d; text-shadow: 0 4px 0 #7b3c0c, 0 10px 26px rgba(0,0,0,.45); }
+  .ending .sub { color: #e5d2ef; }
+  .volcano-stage { position: relative; max-width: 1100px; margin: -10px auto 0; min-height: 360px; display: grid; place-items: end center; }
+  .volcano-stage::before {
+    content: ""; position: absolute; left: 50%; top: 4%; width: 46%; aspect-ratio: 1; translate: -50% 0;
+    background: repeating-conic-gradient(from 0deg, rgba(255,211,87,.28) 0 9deg, transparent 9deg 23deg);
+    border-radius: 50%; filter: blur(1px);
+  }
+  .volcano-stage img { position: relative; z-index: 1; width: min(100%, 980px); image-rendering: pixelated; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); }
+  .ending-copy { position: relative; z-index: 2; max-width: 700px; margin: 12px auto 0; color: #e9dded; font-weight: 750; font-size: 1.08rem; }
+  .ending-badges { display: flex; flex-wrap: wrap; justify-content: center; gap: 9px; list-style: none; margin: 25px 0 0; padding: 0; }
+  .ending-badges li { color: #3c1e09; background: #ffcf4d; border: 2px solid #8a4a12; border-radius: 999px; padding: .38em .76em; font-weight: 900; }
+
+  /* ============ boss royale ============ */
+  .royale {
+    color: #fbefff; overflow: clip;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255, 207, 77, .22), transparent 70%),
+      radial-gradient(circle at 10% 90%, rgba(226, 58, 58, .22), transparent 32%),
+      radial-gradient(circle at 92% 82%, rgba(157, 113, 220, .26), transparent 34%),
+      #160c1f;
+  }
+  .royale::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+    background:
+      conic-gradient(from 200deg at 22% -8%, transparent 0 14deg, rgba(255, 238, 168, .14) 14deg 26deg, transparent 26deg),
+      conic-gradient(from 134deg at 78% -8%, transparent 0 14deg, rgba(255, 238, 168, .14) 14deg 26deg, transparent 26deg);
+  }
+  .royale .wrap { position: relative; z-index: 1; }
+  .royale h2 {
+    color: #ffcf4d; font-size: clamp(2.6rem, 7vw, 4.6rem);
+    -webkit-text-stroke: 1.5px #5a2b0e;
+    text-shadow: 0 5px 0 #8f1f1f, 0 12px 30px rgba(0,0,0,.55);
+  }
+  .royale .sub { color: #ead9f6; }
+  .royale-unlock {
+    display: inline-block; margin: 0 0 14px; padding: .34em .9em .3em;
+    color: #2a1406; background: linear-gradient(180deg, #fff083, #ffba21);
+    border: 3px solid #9b4f08; border-radius: 999px; box-shadow: 0 4px 0 #743705;
+    font-family: var(--font-display); font-size: .82rem; font-weight: 950; letter-spacing: .06em; text-transform: uppercase;
+    transform: rotate(-1.5deg);
+  }
+  .ring-stage {
+    position: relative; margin: 0 auto 30px; max-width: 980px;
+    display: grid; grid-template-columns: 1fr minmax(170px, .9fr) 1fr; align-items: end; gap: 10px;
+    padding: 70px clamp(14px, 3vw, 34px) 0;
+    border: 4px solid #ffcf4d; border-radius: 28px;
+    background:
+      repeating-linear-gradient(180deg, transparent 0 26px, rgba(255, 207, 77, .5) 26px 30px, transparent 30px 58px) top / 100% 120px no-repeat,
+      linear-gradient(180deg, #2a1838 0%, #241430 62%, #3b2318 62%, #2b190f 100%);
+    box-shadow: 0 12px 0 rgba(0,0,0,.45), inset 0 0 60px rgba(255, 207, 77, .1);
+    overflow: hidden;
+  }
+  .corner, .strip { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding-bottom: 22px; }
+  .corner-tag, .strip-tag {
+    color: #1a1320; background: #ffcf4d; border-radius: 7px; padding: .2em .6em;
+    font-family: var(--font-display); font-size: .8rem; font-weight: 950; letter-spacing: .1em; text-transform: uppercase;
+  }
+  .strip-tag { background: #b9f46c; }
+  .corner .medallion { position: relative; width: clamp(108px, 15vw, 150px); }
+  .boss-cue {
+    font-family: var(--font-display); font-weight: 950; font-size: .95rem; line-height: 1.1; text-align: center;
+    padding: .3em .7em; border-radius: 10px; transform: rotate(-3deg);
+  }
+  .dizzy .boss-cue { color: #2a1406; background: #ffcf4d; border: 3px solid #8a4a12; box-shadow: 0 4px 0 #743705; }
+  .dizzy .medallion { border-color: #fff083; box-shadow: 0 6px 0 rgba(0,0,0,.45), 0 0 0 4px rgba(26,19,32,.8), 0 0 26px rgba(255, 207, 77, .75); }
+  .stars {
+    position: absolute; top: 8%; left: 0; right: 0; z-index: 1; text-align: center;
+    color: #fff083; font-size: 1.1rem; letter-spacing: .1em; text-shadow: 0 2px 0 #5a2b0e;
+  }
+  .waiting .boss-cue { color: #cbb9d8; border: 2px dashed rgba(203, 185, 216, .6); transform: none; }
+  .waiting .medallion { filter: saturate(.45) brightness(.7); }
+  .medallion {
+    aspect-ratio: 1; border-radius: 50%; overflow: hidden; flex: none;
+    border: 4px solid #ffcf4d; background: #4a3562;
+    box-shadow: 0 6px 0 rgba(0,0,0,.45), 0 0 0 4px rgba(26,19,32,.8);
+  }
+  .medallion img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 24%; }
+  .corner:first-child .medallion { transform: rotate(-4deg); }
+  .corner:last-child .medallion { transform: rotate(4deg); }
+  .strip { border-inline: 3px dashed rgba(185, 244, 108, .55); align-self: stretch; justify-content: flex-end; }
+  .strip .kid { height: 118px; width: auto; image-rendering: pixelated; filter: drop-shadow(0 6px 0 rgba(0,0,0,.4)); }
+  .strip .drops { display: flex; gap: 22px; align-items: flex-end; }
+  .strip .drops img { height: 38px; width: auto; image-rendering: pixelated; }
+  .vs-burst {
+    position: absolute; top: 18px; left: 50%; translate: -50% 0; z-index: 2;
+    color: #fff6d8; background: #c92f2f; border: 3px solid #8f1f1f; border-radius: 12px;
+    padding: .1em .55em .14em; font-family: var(--font-display); font-weight: 950; font-size: 1.5rem;
+    transform: rotate(-6deg); box-shadow: 0 5px 0 #8f1f1f;
+  }
+  .ladder {
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; gap: 6px 4px;
+    list-style: none; margin: 0 auto 34px; padding: 0; counter-reset: rung;
+  }
+  .ladder li {
+    counter-increment: rung; position: relative; width: 132px;
+    display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center;
+    font-family: var(--font-display); font-weight: 950; font-size: .92rem; line-height: 1.1; color: #fff2c8;
+  }
+  .ladder li::before {
+    content: counter(rung); position: absolute; top: -6px; left: 22px; z-index: 2;
+    width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%;
+    color: #1a1320; background: #ffcf4d; border: 2px solid #5a2b0e; font-size: .8rem;
+  }
+  .ladder li:not(:last-child)::after {
+    content: "▶"; position: absolute; right: -10px; top: 34px; color: #ffcf4d; font-size: 1rem;
+  }
+  .ladder .medallion { width: 84px; border-width: 3px; }
+  .ladder li:last-child .medallion { border-color: #e23a3a; box-shadow: 0 6px 0 rgba(0,0,0,.45), 0 0 18px rgba(226,58,58,.6); }
+  .royale-rules { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 26px; }
+  .rule-card {
+    padding: 18px 16px; border-radius: 18px;
+    background: #241a30; border: 3px solid #4a3562; box-shadow: 0 8px 0 rgba(0,0,0,.4);
+  }
+  .rule-card b { display: block; margin-bottom: 6px; color: #ffcf4d; font-family: var(--font-display); font-size: 1.15rem; letter-spacing: -.02em; text-transform: uppercase; }
+  .rule-card span { color: #dccdea; font-weight: 700; font-size: .95rem; }
+  .royale-extras { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .extra-card { padding: 18px 20px; border-radius: 18px; background: rgba(255,255,255,.06); border: 2px dashed rgba(255,207,77,.5); }
+  .extra-card h3 { margin: 0 0 10px; color: #fff2c8; font-size: 1.25rem; text-transform: uppercase; letter-spacing: -.02em; }
+  .extra-card p { margin: 12px 0 0; color: #dccdea; font-weight: 700; }
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+  .chip-row li {
+    color: #2a1406; background: #ffcf4d; border: 2px solid #8a4a12; border-radius: 999px;
+    padding: .3em .75em; font-weight: 900; font-size: .88rem;
+  }
+  .chip-row.crowns li::before { content: "♛"; margin-right: 6px; color: #8f1f1f; }
+  .chip-row.spices li { background: #ffd9d0; border-color: #b3271a; color: #5c140b; border-radius: 12px; }
+  .chip-row.spices li small { display: block; font-weight: 700; font-size: .82rem; }
+  .ladder-note { margin: -18px 0 30px; text-align: center; color: #cbb9d8; font-weight: 700; font-size: .95rem; }
+  @media (max-width: 900px) { .royale-rules { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 680px) {
+    .ring-stage { grid-template-columns: 1fr 1fr; padding-top: 58px; }
+    .boss-cue { font-size: .82rem; }
+    .strip { grid-column: 1 / -1; grid-row: 2; border-inline: 0; border-top: 3px dashed rgba(185, 244, 108, .55); padding-top: 14px; }
+    .royale-extras, .royale-rules { grid-template-columns: 1fr; }
+    .ladder li { width: 104px; }
+    .ladder li:not(:last-child)::after { display: none; }
+  }
+
+  /* ============ story ============ */
+  .story { background: #fff6e3; }
+  .story-grid { display: grid; grid-template-columns: 400px 1fr; gap: 52px; align-items: center; }
+  .polaroid {
+    background: #fffdf4; border-radius: 14px;
+    padding: 16px 16px 18px;
+    box-shadow: 0 14px 34px rgba(90, 43, 14, .28);
+    transform: rotate(-2.4deg);
+    max-width: 400px; margin: 0 auto;
+  }
+  .polaroid img { border-radius: 8px; }
+  .polaroid figcaption {
+    font-family: var(--font-body); font-weight: 700; text-align: center;
+    color: #7a5a34; padding-top: 12px; font-size: .98rem;
+  }
+  .story h2 { color: #b3271a; text-shadow: 0 3px 0 rgba(179,39,26,.15); font-size: clamp(2rem, 4.4vw, 3rem); transform: rotate(-1deg); margin: 0 0 18px; }
+  .story p { color: #4a3826; font-weight: 600; margin: 0 0 16px; max-width: 58ch; }
+  .story p b { color: #2b2118; }
+  .story .credit {
+    display: inline-block; margin-top: 8px;
+    font-family: var(--font-body); font-weight: 800; font-size: 1.08rem;
+    color: #7a4a12; background: #ffe9b0; border: 2.5px dashed #d9a53a;
+    border-radius: 12px; padding: .5em 1em;
+    transform: rotate(-.6deg);
+  }
+  .maker-card {
+    display: flex; align-items: center; gap: 18px; margin-top: 14px; max-width: 520px;
+    padding: 14px 20px 14px 14px;
+    background: #ffe9b0; border: 3px dashed #d9a53a; border-radius: 20px;
+    transform: rotate(-.6deg);
+  }
+  .pancake-gal { width: 136px; height: 136px; flex: none; filter: drop-shadow(0 6px 0 rgba(122,74,18,.22)); }
+  .maker-card p { margin: 0; max-width: none; }
+  .maker-kicker { color: #9a5a16; font-family: var(--font-display); font-size: .78rem; font-weight: 950; letter-spacing: .12em; text-transform: uppercase; }
+  .maker-name { color: #7a2e10; font-family: var(--font-display); font-size: 1.7rem; font-weight: 950; letter-spacing: -.03em; line-height: 1.05; }
+  .maker-card .maker-bio { color: #6b4a22; font-weight: 700; font-size: .98rem; margin-top: 4px; }
+  .pancake-mini { width: 22px; height: 22px; vertical-align: -5px; margin-right: 6px; }
+  @media (max-width: 900px) {
+    .maker-card { margin-left: auto; margin-right: auto; text-align: left; }
+    .story-grid { grid-template-columns: 1fr; gap: 40px; }
+    .story .txt { text-align: center; }
+    .story p { margin-left: auto; margin-right: auto; }
+  }
+  /* narrow phones: stack the mascot over the text instead of squeezing the bio to a sliver */
+  @media (max-width: 420px) {
+    .maker-card { flex-direction: column; text-align: center; padding: 16px; }
+  }
+
+  /* ============ grown-ups ============ */
+  .grownups { background: #f2f7fa; }
+  .grownups h2 { color: #24557e; text-shadow: 0 3px 0 rgba(36,85,126,.14); }
+  .grownups .sub { color: #4a6478; }
+  .grownups-intro { max-width: 62ch; margin: 0 auto 34px; text-align: center; color: #37475a; font-weight: 600; }
+  .safety-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 900px; margin: 0 auto; }
+  .safety-item {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: #ffffff; border: 2.5px solid #d5e2ec; border-radius: 16px;
+    padding: 16px 18px;
+    box-shadow: 0 4px 0 rgba(36, 85, 126, .08);
+  }
+  .safety-item .ico { font-size: 1.5rem; flex: none; line-height: 1.3; }
+  .safety-item b { display: block; color: #1f3346; font-family: var(--font-display); font-weight: 950; font-size: .96rem; letter-spacing: -.025em; text-transform: uppercase; }
+  .safety-item span { color: #4a6478; font-weight: 600; font-size: .95rem; }
+  .safety-motto {
+    text-align: center; margin: 34px auto 0; max-width: 56ch;
+    color: #24557e; font-weight: 700;
+  }
+  .safety-motto i { font-style: normal; font-family: var(--font-display); font-weight: 950; }
+  .safety-fine { text-align: center; margin: 10px auto 0; max-width: 60ch; color: #4a6478; font-weight: 600; font-size: .95rem; }
+  @media (max-width: 760px) { .safety-grid { grid-template-columns: 1fr; max-width: 540px; } }
+
+  /* ============ final CTA ============ */
+  .finale {
+    background: linear-gradient(180deg, #ffd75e, #ffb340);
+    text-align: center; overflow: clip;
+  }
+  .finale .rays {
+    position: absolute; inset: -40% -20%; pointer-events: none; opacity: .5;
+    background: conic-gradient(from 0deg,
+      rgba(255,255,255,0) 0deg, rgba(255,244,200,.85) 12deg, rgba(255,255,255,0) 24deg,
+      rgba(255,255,255,0) 48deg, rgba(255,244,200,.85) 60deg, rgba(255,255,255,0) 72deg,
+      rgba(255,255,255,0) 96deg, rgba(255,244,200,.85) 108deg, rgba(255,255,255,0) 120deg,
+      rgba(255,255,255,0) 144deg, rgba(255,244,200,.85) 156deg, rgba(255,255,255,0) 168deg,
+      rgba(255,255,255,0) 192deg, rgba(255,244,200,.85) 204deg, rgba(255,255,255,0) 216deg,
+      rgba(255,255,255,0) 240deg, rgba(255,244,200,.85) 252deg, rgba(255,255,255,0) 264deg,
+      rgba(255,255,255,0) 288deg, rgba(255,244,200,.85) 300deg, rgba(255,255,255,0) 312deg,
+      rgba(255,255,255,0) 336deg, rgba(255,244,200,.85) 348deg, rgba(255,255,255,0) 360deg);
+  }
+  .finale .wrap { position: relative; z-index: 1; }
+  .finale h2 {
+    color: #5a2b0e; font-size: clamp(2.2rem, 5vw, 3.6rem);
+    text-shadow: 0 3px 0 rgba(255,255,255,.4);
+    transform: rotate(-1.2deg); margin: 0 0 26px;
+  }
+  .finale .hero-cta { display: inline-block; }
+  .finale-micro { margin: 20px 0 0; font-weight: 800; color: #6b3a10; }
+  .finale-signoff { margin: 34px 0 0; font-family: var(--font-body); font-weight: 800; font-size: 1.15rem; color: #7a4a12; }
+
+  /* ============ footer ============ */
+  footer {
+    background: #3d2b1c; color: #e8d9c0;
+    /* bottom room so the floating Mash 'Em pill never hides the last lines */
+    padding: 34px 24px 96px; text-align: center;
+    font-weight: 600; font-size: .95rem;
+  }
+  footer p { margin: 6px 0; }
+  footer a { display: inline-block; padding: .7em .4em; color: #ffcf4d; font-weight: 700; }
+  footer .silly { color: #b59f83; }
+
+  /* ============ scroll-reveal + motion (gated) ============ */
+  .reveal { opacity: 1; }
+  @media (prefers-reduced-motion: no-preference) {
+    .wordmark { animation: wobble 5.5s ease-in-out infinite; }
+    @keyframes wobble {
+      0%, 100% { transform: rotate(-2deg) scale(1); }
+      50% { transform: rotate(-.6deg) scale(1.025); }
+    }
+    .hero .play-btn { animation: pulse 1.7s ease-in-out infinite; }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 9px 0 #7a4a12, 0 18px 30px rgba(20,10,0,.35), 0 0 0 0 rgba(255,207,77,.65); }
+      50% { box-shadow: 0 9px 0 #7a4a12, 0 18px 30px rgba(20,10,0,.35), 0 0 0 16px rgba(255,207,77,0); }
+    }
+    .scroll-hint .chev { animation: bob-hint 1.4s ease-in-out infinite; }
+    @keyframes bob-hint { 0%,100% { transform: translateY(0); } 50% { transform: translateY(7px); } }
+
+    .kernel { animation: rise var(--dur, 9s) linear var(--delay, 0s) infinite; }
+    @keyframes rise {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+      8% { opacity: .9; }
+      85% { opacity: .8; }
+      100% { transform: translateY(calc(-100svh - 60px)) translateX(34px) rotate(300deg); opacity: 0; }
+    }
+
+    .gallery::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 40% 26% at 68% 6%, rgba(212,190,255,.85), transparent 68%);
+      opacity: 0;
+      animation: heat-lightning 13s ease-in-out infinite;
+    }
+    @keyframes heat-lightning {
+      0%, 55%, 100% { opacity: 0; }
+      57% { opacity: .10; } 59% { opacity: .02; } 61% { opacity: .08; } 65% { opacity: 0; }
+    }
+
+    .hero-fred { animation: bob 2.4s ease-in-out infinite; }
+    .farmer-card img { animation: bob 2.6s ease-in-out var(--bd, 0s) infinite; }
+    .strip .kid { animation: bob 2.2s ease-in-out infinite; }
+    .vs-burst { animation: vs-pop 2.4s ease-in-out infinite; }
+    @keyframes vs-pop { 0%, 100% { transform: rotate(-6deg) scale(1); } 50% { transform: rotate(-2deg) scale(1.12); } }
+    .pancake-gal .syrup-drip { animation: drip 3.2s ease-in-out infinite; transform-origin: top; transform-box: fill-box; }
+    @keyframes drip { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(1.28); } }
+    .pancake-gal .pg-eyes { animation: blink 4.2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes blink { 0%, 92%, 100% { transform: scaleY(1); } 95% { transform: scaleY(.1); } }
+    .dizzy .stars { animation: dizzy-spin 1.6s ease-in-out infinite; }
+    @keyframes dizzy-spin { 0%, 100% { transform: translateX(-6px) rotate(-6deg); } 50% { transform: translateX(6px) rotate(6deg); } }
+    .dizzy .boss-cue { animation: vs-pop 1.4s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-9px); } }
+    .farmer-card:hover img { animation-duration: 1.1s; }
+
+    .rescue-card .spark { animation: twinkle 2.2s ease-in-out var(--bd, 0s) infinite; }
+    @keyframes twinkle { 0%, 100% { transform: scale(.75) rotate(0deg); opacity: .5; } 50% { transform: scale(1.15) rotate(18deg); opacity: 1; } }
+
+    .finale .rays { animation: spin 70s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .confetti-bit { position: absolute; top: 50%; left: 50%; width: 11px; height: 14px;
+      background: radial-gradient(circle at 35% 30%, #ffefad, #f5c518 60%, #d99a0b);
+      border-radius: 46% 46% 54% 54%; pointer-events: none; z-index: 5;
+      animation: burst .85s cubic-bezier(.14,.74,.36,1) forwards;
+    }
+    @keyframes burst {
+      0% { transform: translate(-50%, -50%) rotate(0deg) scale(1); opacity: 1; }
+      100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(.8); opacity: 0; }
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .kernels { display: none; }
+    .confetti-bit { display: none; }
+    *, *::before, *::after { transition-duration: 0s !important; }
+    .play-btn:hover, .play-btn:active, .farmer-card:hover, .rogue-card:hover, .rogue-card:hover .stamp { transform: none; }
+  }
+  /* Still mode: the page's own pause for every looping animation (WCAG 2.2.2). */
+  html.still *, html.still *::before, html.still *::after { animation-play-state: paused !important; }
+  html.still .kernels { display: none; }
+  .still-toggle {
+    margin: 14px 0 0; padding: .45em .9em; border-radius: 999px; cursor: pointer;
+    color: #fff6d8; background: rgba(26, 19, 32, .7); border: 2px solid rgba(255, 246, 216, .6);
+    font: 800 .9rem var(--font-body);
+  }
+  .still-toggle[aria-pressed="true"] { color: #2a1406; background: #ffe9b0; }
+  @media (prefers-reduced-motion: reduce) { .still-toggle { display: none; } }
+  @media (prefers-contrast: more) {
+    .card, .world-card, .arcade-board, .safety-item, .rule-card, .ring-stage { border-width: 4px; }
+    .sub, .world-copy p, .ending-copy { color: currentColor; }
+  }
+  @media (forced-colors: active) {
+    .play-btn, .verb-list li, .power-chip, .goal-stamps li, .chip-row li, .royale-unlock { border: 2px solid ButtonText; }
+    .world-shot::after { border: 2px solid CanvasText; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Pancake Gal's mascot, drawn once and reused (maker card + footer). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="pg-stack" viewBox="0 0 200 200">
+    <ellipse cx="100" cy="176" rx="82" ry="14" fill="#fffdf4" stroke="#d9c7a3" stroke-width="4"/>
+    <ellipse cx="100" cy="162" rx="72" ry="16" fill="#c97a2e"/>
+    <rect x="28" y="140" width="144" height="22" rx="11" fill="#e8a24a" stroke="#9a5418" stroke-width="4"/>
+    <rect x="34" y="114" width="132" height="30" rx="14" fill="#efb35b" stroke="#9a5418" stroke-width="4"/>
+    <rect x="40" y="88" width="120" height="30" rx="14" fill="#f6c46e" stroke="#9a5418" stroke-width="4"/>
+    <path d="M44 92 C60 70 140 70 156 92 C158 100 150 104 146 100 C140 112 132 104 132 98 C120 108 110 102 104 96 C96 108 86 104 84 96 C74 104 62 104 60 98 C54 106 44 102 44 92 Z" fill="#8a3d10"/>
+    <path class="syrup-drip" d="M131 98 C131 112 127 122 132 128 C137 122 133 112 133 98 Z" fill="#8a3d10"/>
+    <rect x="84" y="66" width="34" height="22" rx="5" transform="rotate(-8 101 77)" fill="#ffe27a" stroke="#c98a17" stroke-width="3"/>
+    <rect x="89" y="69" width="10" height="5" rx="2" transform="rotate(-8 101 77)" fill="#fff6c8"/>
+    <path d="M52 78 L38 64 L36 86 Z M52 78 L66 62 L70 84 Z" fill="#e23a3a" stroke="#8f1f1f" stroke-width="3" stroke-linejoin="round"/>
+    <circle cx="52" cy="78" r="6" fill="#ff6b5f" stroke="#8f1f1f" stroke-width="3"/>
+    <g class="pg-eyes">
+      <ellipse cx="80" cy="128" rx="5" ry="7" fill="#3b1e0c"/>
+      <ellipse cx="120" cy="128" rx="5" ry="7" fill="#3b1e0c"/>
+      <circle cx="82" cy="125" r="1.8" fill="#fffdf4"/>
+      <circle cx="122" cy="125" r="1.8" fill="#fffdf4"/>
+    </g>
+    <ellipse cx="68" cy="136" rx="7" ry="4" fill="#ff8f7a" opacity=".75"/>
+    <ellipse cx="132" cy="136" rx="7" ry="4" fill="#ff8f7a" opacity=".75"/>
+    <path d="M90 135 Q100 145 110 135" fill="none" stroke="#3b1e0c" stroke-width="4" stroke-linecap="round"/>
+  </symbol>
+</svg>
+
+<a class="skip" href="#main-content">Skip to main content</a>
+
+<header class="hero" id="top">
+  <nav class="site-nav" aria-label="Main">
+    <a class="nav-brand" href="#top">KILLER CORN</a>
+    <div class="nav-links">
+      <a href="#worlds">Worlds</a>
+      <a href="#crew">Crew</a>
+      <a href="#scores">Scores</a>
+      <a class="nav-keep" href="#royale">Boss Royale</a>
+      <a class="nav-keep" href="#grownups"><span class="nav-long">For </span>Grown-Ups</a>
+      <a class="nav-play" data-play href="/play/">Play Now</a>
+    </div>
+  </nav>
+  <div class="kernels" aria-hidden="true">
+    <span class="kernel" style="--x: 4%;  --s: 13px; --dur: 11s;  --delay: 0s;"></span>
+    <span class="kernel" style="--x: 12%; --s: 17px; --dur: 9s;   --delay: 2.2s;"></span>
+    <span class="kernel" style="--x: 21%; --s: 11px; --dur: 12s;  --delay: 4.6s;"></span>
+    <span class="kernel" style="--x: 29%; --s: 15px; --dur: 8.4s; --delay: 1.1s;"></span>
+    <span class="kernel" style="--x: 38%; --s: 12px; --dur: 10s;  --delay: 5.4s;"></span>
+    <span class="kernel" style="--x: 47%; --s: 18px; --dur: 9.4s; --delay: 3s;"></span>
+    <span class="kernel" style="--x: 55%; --s: 12px; --dur: 11.6s;--delay: .6s;"></span>
+    <span class="kernel" style="--x: 63%; --s: 16px; --dur: 8.8s; --delay: 4.1s;"></span>
+    <span class="kernel" style="--x: 71%; --s: 12px; --dur: 10.6s;--delay: 2.7s;"></span>
+    <span class="kernel" style="--x: 79%; --s: 14px; --dur: 9.8s; --delay: 6.2s;"></span>
+    <span class="kernel" style="--x: 87%; --s: 17px; --dur: 8.2s; --delay: 1.8s;"></span>
+    <span class="kernel" style="--x: 94%; --s: 12px; --dur: 11.2s;--delay: 3.8s;"></span>
+  </div>
+
+  <div class="hero-inner">
+    <p class="hero-badge">5 Worlds · 5 Friends · 1 Bad Crop</p>
+    <h1 class="wordmark"><span>KILLER</span> <span>CORN</span></h1>
+    <p class="tagline">The corn has gone bad.</p>
+    <p class="pitch">Run, jump, and mash the snacks gone bad across five food worlds. Free your fruit and veggie friends. Face King Corn three times. Then every boss wants a rematch.</p>
+    <div class="hero-cta" id="play">
+      <a class="play-btn" data-play href="/play/">Mash 'Em <span class="tri" aria-hidden="true">▶</span></a>
+    </div>
+    <p class="hero-micro">Free to play in your browser. No downloads, no fuss.</p>
+    <ul class="hero-trust" aria-label="Quick facts">
+      <li>No ads</li><li>No account</li><li>Local saves</li>
+    </ul>
+    <button type="button" class="still-toggle" aria-pressed="false" hidden>Pause page motion</button>
+  </div>
+
+  <img class="hero-fred px" src="media/sprites/fred-idle.webp" alt="" aria-hidden="true" width="210" height="335" loading="lazy">
+
+  <a class="scroll-hint" href="#howto">
+    <span>Scroll for the whole harvest</span>
+    <span class="chev" aria-hidden="true">▼</span>
+  </a>
+</header>
+
+<main id="main-content" tabindex="-1">
+
+  <!-- ============ REAL GAMEPLAY (unedited frames captured from the game) ============ -->
+  <section class="sect gameplay" id="gameplay" aria-labelledby="gameplay-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="gameplay-h">See It in Action</h2>
+        <p class="sub">Real frames from the game. Nothing staged.</p>
+      </div>
+    </div>
+    <div class="shot-row" role="region" aria-label="Gameplay screenshots" tabindex="0">
+      <figure class="shot">
+        <img src="media/screens/world-1-jump.webp" alt="Gameplay: Fred leaps over a grumpy kernel creep in the Cornfield Sunrise corn rows, with a good cob and a wheat box ahead" width="1280" height="720" loading="lazy">
+        <figcaption>Hop the bad corn. Grab the good cobs.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="media/screens/boss-dizzy.webp" alt="Gameplay: Butter Stick reels with dizzy stars while the banner says Dizzy! Hit it now! and Fred runs in" width="1280" height="720" loading="lazy">
+        <figcaption>Every boss shows you when to strike.</figcaption>
+      </figure>
+      <figure class="shot">
+        <img src="media/screens/royale-drop-in.webp" alt="Gameplay: Boss Royale, with the banner Butter Stick drops in! and Salt and Pepper shown as next up" width="1280" height="720" loading="lazy">
+        <figcaption>Boss Royale: the next boss drops in.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#1a1320;"><path fill="#eaf7ff" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ HOW TO PLAY ============ -->
+  <section class="sect howto" id="howto" aria-labelledby="howto-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="howto-h">Run. Jump. Mash.</h2>
+        <p class="sub">Easy to pick up. Tricky to put down.</p>
+      </div>
+
+      <div class="howto-grid">
+        <div class="card howto-card reveal" style="--rd:.05s">
+          <h3>Move</h3>
+          <p>Zip down the corn rows.</p>
+          <div class="keys"><kbd>←</kbd><kbd>→</kbd><span aria-hidden="true" style="align-self:center;font-weight:800;color:#4a6478;">or</span><kbd>A</kbd><kbd>D</kbd></div>
+        </div>
+        <div class="card howto-card reveal" style="--rd:.15s">
+          <h3>Jump</h3>
+          <p>Hop the hay bales and the terraces.</p>
+          <div class="keys"><kbd>↑</kbd><kbd>W</kbd><kbd>Space</kbd></div>
+        </div>
+        <div class="card howto-card reveal" style="--rd:.25s">
+          <h3>Mash 'Em</h3>
+          <p>Bonk the bad corn. It pops right back into place.</p>
+          <div class="keys"><kbd>J</kbd><kbd>K</kbd></div>
+        </div>
+        <div class="card howto-card reveal" style="--rd:.35s">
+          <h3>Crew Power</h3>
+          <p>Use the active friend's trick.</p>
+          <div class="keys"><kbd>L</kbd></div>
+        </div>
+      </div>
+      <p class="pad-note reveal"><b>Gamepad or phone?</b> Stick to move, <b>A</b> to jump, <b>B</b> to mash, <b>X</b> for crew power. On a phone or tablet, big touch buttons show up on screen. <b>Esc</b> or Start pauses, and the pause menu swaps crew friends.</p>
+
+      <div class="goal-ribbon reveal">
+        <img src="media/sprites/good-cob-1.webp" alt="A smiling golden corn cob" class="px" width="327" height="437">
+        <p>Bonk the bad corn, grab the good cobs, reach the barn.</p>
+      </div>
+
+      <div class="field-guide reveal">
+        <div class="guide-chip">
+          <img src="media/sprites/good-cob-1.webp" alt="" aria-hidden="true" class="px" width="327" height="437" loading="lazy">
+          <div><b>Good Cob</b><span>Grab it.</span></div>
+        </div>
+        <div class="guide-chip">
+          <img src="media/sprites/wheat-box-idle.webp" alt="" aria-hidden="true" class="px" width="357" height="348" loading="lazy">
+          <div><b>Wheat Box</b><span>Smash it.</span></div>
+        </div>
+        <div class="guide-chip">
+          <img src="media/sprites/spiked-corn-1.webp" alt="" aria-hidden="true" class="px" width="350" height="303" loading="lazy">
+          <div><b>Spiked Corn</b><span>Dodge it.</span></div>
+        </div>
+      </div>
+
+      <div class="squirrel-warning reveal">
+        <img src="media/sprites/squirrel-throw.webp" alt="A pixel-art squirrel hurling a spiked corn cob" class="px" width="596" height="341" loading="lazy">
+        <p><b>Heads up, farmers.</b> The squirrels signed up with the corn. They lob spiked cobs from the stalks, so keep one eye on the sky.</p>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#eaf7ff;"><path fill="#1a1320" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ FIVE-WORLD FIELD GUIDE ============ -->
+  <section class="sect worlds" id="worlds" aria-labelledby="worlds-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="worlds-h">Five Fields. Five New Tricks.</h2>
+        <p class="sub">The scenery changes. The way you play changes with it.</p>
+      </div>
+
+      <div class="world-stack">
+        <article class="world-card w1 reveal">
+          <figure class="world-shot">
+            <img src="media/world-1.webp" alt="Pixel-art sunrise over red barns, green corn rows, and distant blue hills" width="1200" height="400" loading="lazy">
+            <img class="mechanic-sprite" src="media/sprites/fred-run-b.webp" alt="" aria-hidden="true" width="245" height="322" loading="lazy">
+          </figure>
+          <div class="world-copy">
+            <p class="world-kicker">World 1 · Strawberry</p>
+            <h3>Cornfield Sunrise</h3>
+            <p>Learn the rhythm, then let Berry Rush turn barn gaps into speed lanes.</p>
+            <ul class="verb-list"><li>Dash routes</li><li>Barn gaps</li><li>First squirrels</li></ul>
+          </div>
+        </article>
+
+        <article class="world-card w2 reveal">
+          <figure class="world-shot">
+            <img src="media/world-2.webp" alt="Pixel-art carrot terraces, windmills, and rows of bright root vegetables" width="1200" height="400" loading="lazy">
+            <img class="mechanic-sprite" src="media/mechanisms/root-switch.webp" alt="" aria-hidden="true" width="48" height="64" loading="lazy">
+          </figure>
+          <div class="world-copy">
+            <p class="world-kicker">World 2 · Carrot</p>
+            <h3>Shaker Acres</h3>
+            <p>Whack root switches, open gates, and poke through tight trouble from a safer distance.</p>
+            <ul class="verb-list"><li>Root switches</li><li>Gates</li><li>Poking hazards</li></ul>
+          </div>
+        </article>
+
+        <article class="world-card w3 reveal">
+          <figure class="world-shot">
+            <img src="media/world-3.webp" alt="Pixel-art oak orchard hung with acorns, blackberry bushes, and blue mushrooms under a purple sky" width="1200" height="400" loading="lazy">
+            <img class="mechanic-sprite" src="media/mechanisms/bounce-pad.webp" alt="" aria-hidden="true" width="84" height="64" loading="lazy">
+            <img class="mechanic-sprite secondary" src="media/mechanisms/falling-acorn.webp" alt="" aria-hidden="true" width="32" height="32" loading="lazy">
+          </figure>
+          <div class="world-copy">
+            <p class="world-kicker">World 3 · Blueberry</p>
+            <h3>Acorn Patrol</h3>
+            <p>Spring through tree routes while moving lifts climb and falling acorns keep you hopping.</p>
+            <ul class="verb-list"><li>Bounce pads</li><li>Moving lifts</li><li>Falling acorns</li></ul>
+          </div>
+        </article>
+
+        <article class="world-card w4 reveal">
+          <figure class="world-shot">
+            <img src="media/world-4.webp" alt="Pixel-art rainy green fields, farm sheds, and storm clouds" width="1200" height="400" loading="lazy">
+            <img class="mechanic-sprite" src="media/mechanisms/slick-board.webp" alt="" aria-hidden="true" width="120" height="32" loading="lazy">
+          </figure>
+          <div class="world-copy">
+            <p class="world-kicker">World 4 · Lettuce</p>
+            <h3>Pickle Storm</h3>
+            <p>Plan one brave crossing, slide across slick boards, and let Leaf Guard save the landing.</p>
+            <ul class="verb-list"><li>Rain</li><li>Slick boards</li><li>Guarded crossings</li></ul>
+          </div>
+        </article>
+
+        <article class="world-card w5 reveal">
+          <figure class="world-shot">
+            <img src="media/world-5.webp" alt="Pixel-art royal farm machinery, crowned windmills, and a golden Crownfield sunset" width="1200" height="400" loading="lazy">
+            <img class="mechanic-sprite" src="media/mechanisms/ricochet-target.webp" alt="" aria-hidden="true" width="64" height="72" loading="lazy">
+            <img class="mechanic-sprite secondary" src="media/mechanisms/moving-platform.webp" alt="" aria-hidden="true" width="150" height="100" loading="lazy">
+          </figure>
+          <div class="world-copy">
+            <p class="world-kicker">World 5 · Banana</p>
+            <h3>Crownfield</h3>
+            <p>Bank peels off ricochet targets, shut down squirrel batteries, and ride royal machinery.</p>
+            <ul class="verb-list"><li>Ricochet targets</li><li>Moving platforms</li><li>Royal machinery</li></ul>
+          </div>
+        </article>
+      </div>
+
+      <p class="world-note reveal"><b>More than run and jump:</b> every required route works with the basic moves, while crew powers open faster, safer, and sillier ways through.</p>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#1a1320;"><path fill="#fff6e3" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ MEET THE FARMERS ============ -->
+  <section class="sect farmers" id="farmers" aria-labelledby="farmers-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="farmers-h">Pick Your Kid</h2>
+        <p class="sub">Four farm kids to start. Two more after your first full clear.</p>
+      </div>
+      <div class="farmer-grid">
+        <div class="card farmer-card reveal" style="--rd:.05s">
+          <div class="sprite-box"><img src="media/sprites/fred-idle.webp" alt="Fred, a pixel-art farm boy in a straw hat and blue overalls" class="px" width="210" height="335" loading="lazy" style="--bd:0s"></div>
+          <h3>Fred</h3>
+          <p>The all-arounder. No bad habits.</p>
+        </div>
+        <div class="card farmer-card reveal" style="--rd:.13s">
+          <div class="sprite-box"><img src="media/sprites/daisy-idle.webp" alt="Daisy, a pixel-art farm girl with blond braids" class="px" width="220" height="393" loading="lazy" style="--bd:.4s"></div>
+          <h3>Daisy</h3>
+          <p>Big floaty hops. Hangs in the air.</p>
+        </div>
+        <div class="card farmer-card reveal" style="--rd:.21s">
+          <div class="sprite-box"><img src="media/sprites/theo-idle.webp" alt="Theo, a pixel-art farm boy in a backwards green cap" class="px" width="204" height="371" loading="lazy" style="--bd:.8s"></div>
+          <h3>Theo</h3>
+          <p>Built to barrel. Fast feet, low hops.</p>
+        </div>
+        <div class="card farmer-card reveal" style="--rd:.29s">
+          <div class="sprite-box"><img src="media/sprites/rosa-idle.webp" alt="Rosa, a pixel-art farm girl with a sunflower behind one ear" class="px" width="282" height="420" loading="lazy" style="--bd:1.2s"></div>
+          <h3>Rosa</h3>
+          <p>Quick and twitchy. Forgiving feet.</p>
+        </div>
+        <div class="card farmer-card unlock reveal" style="--rd:.37s">
+          <span class="unlock-ribbon">First-clear unlock</span>
+          <div class="sprite-box"><img src="media/sprites/luca-idle.webp" alt="Luca, a pixel-art farm kid with a rake" class="px" width="213" height="264" loading="lazy" style="--bd:1.6s"></div>
+          <h3>Luca</h3>
+          <p>Rake ready. Mashes snacks twice as fast.</p>
+        </div>
+        <div class="card farmer-card unlock reveal" style="--rd:.45s">
+          <span class="unlock-ribbon">First-clear unlock</span>
+          <div class="sprite-box"><img src="media/sprites/izzy-idle.webp" alt="Izzy, a pixel-art farm kid with a garden hose" class="px" width="196" height="264" loading="lazy" style="--bd:2s"></div>
+          <h3>Izzy</h3>
+          <p>Hose ready. Turn invisible for 30 seconds.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#fff6e3;"><path fill="#1a1320" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ ROGUES GALLERY ============ -->
+  <section class="sect gallery" id="villains" aria-labelledby="gallery-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="gallery-h">The Rogues' Gallery</h2>
+        <p class="sub">Five bosses gone bad. Zero table manners.</p>
+      </div>
+    </div>
+    <p class="swipe-hint" aria-hidden="true">Swipe for more bosses ⟶</p>
+    <div class="marquee reveal" role="region" aria-label="The five bosses of Killer Corn" tabindex="0">
+      <div class="marquee-track">
+        <div class="rogue-card">
+          <span class="stamp">Butter Stick Melted!</span>
+          <img src="media/card-butter-stick.webp" alt="Butter Stick, a grinning stick of butter holding a sword under a stormy sky" width="1040" height="1300" loading="lazy">
+          <div class="rogue-plate"><h3>Butter Stick</h3><p>Smooth talker. Sore loser.</p></div>
+        </div>
+        <div class="rogue-card">
+          <span class="stamp">Shakers Down!</span>
+          <img src="media/card-salt-and-pepper.webp" alt="Salt and Pepper, two grumpy shaker villains posing back to back" width="1040" height="1300" loading="lazy">
+          <div class="rogue-plate"><h3>Salt &amp; Pepper</h3><p>They bicker. You bonk.</p></div>
+        </div>
+        <div class="rogue-card">
+          <span class="stamp">General Acorn Toppled!</span>
+          <img src="media/card-general-acorn.webp" alt="General Acorn, a barrel-chested squirrel general in an acorn helmet waving a spiked corn cob" width="1040" height="1300" loading="lazy">
+          <div class="rogue-plate"><h3>General Acorn</h3><p>Commander of the squirrel artillery.</p></div>
+        </div>
+        <div class="rogue-card">
+          <span class="stamp">Sir Pickle Speared!</span>
+          <img src="media/card-sir-pickle.webp" alt="Sir Pickle, a dill pickle knight with a bucket helmet and a toothpick spear" width="1040" height="1300" loading="lazy">
+          <div class="rogue-plate"><h3>Sir Pickle</h3><p>A knight in briny armor.</p></div>
+        </div>
+        <div class="rogue-card">
+          <span class="stamp">King Corn Popped!</span>
+          <img src="media/card-king-corn.webp" alt="King Corn, a crowned corn cob villain with a husk-leaf cape and a cob scepter" width="1040" height="1300" loading="lazy">
+          <div class="rogue-plate"><h3>King Corn</h3><p>The rotten overlord. The baddest cob of all.</p></div>
+        </div>
+
+      </div>
+    </div>
+    <p class="gallery-note wrap reveal">Four bosses guard the road. Then King Corn: three showdowns, ending with the final un-cobbing.</p>
+    <p class="wrap reveal royale-teaser"><a href="#royale"><b>Then:</b> Boss Royale <span aria-hidden="true">▼</span></a></p>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#1a1320;"><path fill="#eef9e8" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ RESCUE THE CREW ============ -->
+  <section class="sect rescue" id="crew" aria-labelledby="rescue-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="rescue-h">Rescue the Crew</h2>
+        <p class="sub">One good friend is caged in every world. Bust them out and their move is yours.</p>
+      </div>
+      <div class="rescue-grid">
+        <div class="card rescue-card reveal" style="--rd:.05s">
+          <div class="sprite-box">
+            <img class="spark px" src="media/sprites/sparkle.webp" alt="" aria-hidden="true" width="108" height="108" loading="lazy" style="--bd:0s">
+            <img class="buddy px pop-in" src="media/sprites/ally-strawberry-freed.webp" alt="A cheering pixel-art strawberry" width="615" height="504" loading="lazy">
+          </div>
+          <h3>Strawberry</h3>
+          <span class="power-chip">BERRY RUSH</span>
+          <small>Two speed dashes. Zoom, zoom.</small>
+        </div>
+        <div class="card rescue-card reveal" style="--rd:.13s">
+          <div class="sprite-box">
+            <img class="spark px" src="media/sprites/sparkle.webp" alt="" aria-hidden="true" width="108" height="108" loading="lazy" style="--bd:.5s">
+            <img class="buddy px pop-in" src="media/sprites/ally-carrot-freed.webp" alt="A happy pixel-art carrot" width="448" height="701" loading="lazy" style="--rd:.13s">
+          </div>
+          <h3>Carrot</h3>
+          <span class="power-chip">LONG REACH</span>
+          <small>Longer bonks.</small>
+        </div>
+        <div class="card rescue-card reveal" style="--rd:.21s">
+          <div class="sprite-box">
+            <img class="spark px" src="media/sprites/sparkle.webp" alt="" aria-hidden="true" width="108" height="108" loading="lazy" style="--bd:1s">
+            <img class="buddy px pop-in" src="media/sprites/ally-blueberry-freed.webp" alt="A bouncing pixel-art blueberry" width="503" height="413" loading="lazy" style="--rd:.21s">
+          </div>
+          <h3>Blueberry</h3>
+          <span class="power-chip">BLUE BOUNCE</span>
+          <small>One extra bounce in midair.</small>
+        </div>
+        <div class="card rescue-card reveal" style="--rd:.29s">
+          <div class="sprite-box">
+            <img class="spark px" src="media/sprites/sparkle.webp" alt="" aria-hidden="true" width="108" height="108" loading="lazy" style="--bd:1.5s">
+            <img class="buddy px pop-in" src="media/sprites/ally-lettuce-freed.webp" alt="A leafy pixel-art lettuce with a big smile" width="630" height="485" loading="lazy" style="--rd:.29s">
+          </div>
+          <h3>Lettuce</h3>
+          <span class="power-chip">LEAF GUARD</span>
+          <small>Takes one hit for you.</small>
+        </div>
+        <div class="card rescue-card reveal" style="--rd:.37s">
+          <div class="sprite-box">
+            <img class="spark px" src="media/sprites/sparkle.webp" alt="" aria-hidden="true" width="108" height="108" loading="lazy" style="--bd:2s">
+            <img class="buddy px pop-in" src="media/sprites/ally-banana-freed.webp" alt="A grinning pixel-art banana" width="554" height="604" loading="lazy" style="--rd:.37s">
+          </div>
+          <h3>Banana</h3>
+          <span class="power-chip">PEEL TOSS</span>
+          <small>Three peels to throw.</small>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#eef9e8;"><path fill="#fff0c5" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ SCORE CHASE ============ -->
+  <section class="sect scores" id="scores" aria-labelledby="scores-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="scores-h">Beat the Field. Then Beat Yourself.</h2>
+        <p class="sub">Friendly replay goals. No chores. No streaks.</p>
+      </div>
+      <div class="score-layout">
+        <div class="score-copy reveal">
+          <h3>Every run tells a story.</h3>
+          <p>Top-five stage and full-game scoreboards remember your best runs on this device. A faster route, one more good cob, or a clear without losing a try can earn a bright <b>NEW LEVEL BEST</b> award. Boss Royale keeps its own boards too.</p>
+          <ul class="goal-stamps" aria-label="Optional replay goals">
+            <li style="--tilt:-1deg">All Cobs</li>
+            <li style="--tilt:1deg">Keep Every Try</li>
+            <li style="--tilt:-.5deg">Route Challenge</li>
+            <li style="--tilt:1.2deg">Personal Best</li>
+          </ul>
+          <p class="music-note"><b>Each world has its own music.</b> The farm band shifts from sunny banjo hops to orchard arpeggios, a rainy brine shuffle, royal marches, boss romps, and a victory reel.</p>
+        </div>
+        <div class="arcade-board reveal" style="--rd:.12s">
+          <div class="new-best">NEW LEVEL BEST!</div>
+          <table>
+            <caption>Example board · World 2: Root Rows · Top Five</caption>
+            <thead><tr><th scope="col">Rank</th><th scope="col">Kid</th><th scope="col">Score</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td>Rosa</td><td>18,450</td></tr>
+              <tr><td>2</td><td>Fred</td><td>16,900</td></tr>
+              <tr><td>3</td><td>Theo</td><td>15,725</td></tr>
+              <tr><td>4</td><td>Daisy</td><td>14,300</td></tr>
+              <tr><td>5</td><td>Fred</td><td>12,950</td></tr>
+            </tbody>
+          </table>
+          <p class="local-score-note">Anonymous scores only. No names to type and nothing uploaded.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#fff0c5;"><path fill="#fff6e3" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ THE STORY ============ -->
+  <section class="sect story" aria-labelledby="story-h">
+    <div class="wrap">
+      <div class="story-grid">
+        <figure class="polaroid reveal" style="margin:0;">
+          <img src="media/fred-hero.webp" alt="Fred the farm kid holding up a golden corn cob in front of a hand-painted Killer Corn sign" width="1050" height="1400" loading="lazy">
+          <figcaption>Fred, the good cob, and a field worth saving.</figcaption>
+        </figure>
+        <div class="txt reveal" style="--rd:.12s">
+          <h2 id="story-h">Built for One More Run</h2>
+          <p><b>KILLER CORN is tuned like an arcade cabinet:</b> move first, learn fast, and spot a better route every time through.</p>
+          <p>Each world teaches one clear trick, then mixes it with a new food monster, a fresh piece of farm machinery, and a boss with a readable opening.</p>
+          <p>Short stages make it easy to try another kid, chase a cleaner score, or rescue the whole produce crew again.</p>
+          <div class="maker-card">
+            <svg class="pancake-gal" role="img" aria-label="Pancake Gal's mascot: a smiling stack of pancakes with a red bow, syrup, and a pat of butter" viewBox="0 0 200 200"><use href="#pg-stack"/></svg>
+            <div>
+              <p class="maker-kicker">Made and published by</p>
+              <p class="maker-name">Pancake Gal</p>
+              <p class="maker-bio">Flips pancakes before breakfast. Mashes bad corn after lunch. Built KILLER CORN to be silly, fair, and kind.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#fff6e3;"><path fill="#1b1025" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ THE BIG FINISH ============ -->
+  <section class="sect ending" id="ending" aria-labelledby="ending-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="ending-h">A Finish Worth the Whole Harvest</h2>
+        <p class="sub">Tiny spoiler: King Corn does not go quietly.</p>
+      </div>
+      <div class="volcano-stage reveal">
+        <img src="media/popcorn-volcano.webp" alt="A giant pixel-art mound of earth and corn husks glowing like a popcorn volcano" width="1400" height="563" loading="lazy">
+      </div>
+      <p class="ending-copy reveal">Chase the King, rescue the whole crew again, and survive the third showdown. The final cob erupts into a dramatic popcorn volcano, then a skippable arcade credits roll celebrates the farm team. With reduced motion on, the credits show as a still card.</p>
+      <ul class="ending-badges" aria-label="Finale features">
+        <li>Crew-grab chase</li><li>Five-friend rescue</li><li>Popcorn spectacle</li><li>Victory reel</li><li>Boss Royale unlocked</li>
+      </ul>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#1b1025;"><path fill="#160c1f" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ BOSS ROYALE ============ -->
+  <section class="sect royale" id="royale" aria-labelledby="royale-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <p class="royale-unlock">Unlocks after your first full clear</p>
+        <h2 id="royale-h">Boss Royale</h2>
+        <p class="sub">Every boss. One ring. Two at a time.</p>
+      </div>
+
+      <figure class="ring-stage reveal" style="margin-top:0;">
+        <span class="vs-burst" aria-hidden="true">VS</span>
+        <div class="corner dizzy">
+          <span class="boss-cue">Dizzy! Hit it now!</span>
+          <div class="medallion"><span class="stars" aria-hidden="true">★ ★ ★</span><img src="media/card-general-acorn.webp" alt="General Acorn, dizzy in the west corner and open to a hit" width="1040" height="1300" loading="lazy"></div>
+          <span class="corner-tag">West corner</span>
+        </div>
+        <div class="strip">
+          <img class="kid" src="media/sprites/luca-idle.webp" alt="Luca standing in the safe middle strip" width="213" height="264" loading="lazy">
+          <div class="drops">
+            <img src="media/sprites/pep-pickup.webp" alt="A pep pie pop drop" width="192" height="192" loading="lazy">
+            <img src="media/sprites/wheat-box-idle.webp" alt="A wheat box power refill" width="357" height="348" loading="lazy">
+          </div>
+          <span class="strip-tag">Safe strip</span>
+        </div>
+        <div class="corner waiting">
+          <span class="boss-cue">Waiting a turn</span>
+          <div class="medallion"><img src="media/card-sir-pickle.webp" alt="Sir Pickle waiting a turn in the east corner" width="1040" height="1300" loading="lazy"></div>
+          <span class="corner-tag">East corner</span>
+        </div>
+      </figure>
+
+      <ol class="ladder reveal" aria-label="The Boss Royale ladder, in entry order">
+        <li><div class="medallion"><img src="media/card-butter-stick.webp" alt="" width="1040" height="1300" loading="lazy"></div>Butter Stick</li>
+        <li><div class="medallion"><img src="media/card-salt-and-pepper.webp" alt="" width="1040" height="1300" loading="lazy"></div>Salt &amp; Pepper</li>
+        <li><div class="medallion"><img src="media/card-general-acorn.webp" alt="" width="1040" height="1300" loading="lazy"></div>General Acorn</li>
+        <li><div class="medallion"><img src="media/card-sir-pickle.webp" alt="" width="1040" height="1300" loading="lazy"></div>Sir Pickle</li>
+        <li><div class="medallion"><img src="media/card-king-corn.webp" alt="" width="1040" height="1300" loading="lazy"></div>King Corn</li>
+      </ol>
+      <p class="ladder-note reveal">The usual order. The Shuffle spice mixes up the middle bosses.</p>
+
+      <div class="royale-rules">
+        <div class="rule-card reveal" style="--rd:.04s"><b>Two at a time</b><span>One boss per corner. Bosses stay in their corners. Only shots you can see coming cross the middle.</span></div>
+        <div class="rule-card reveal" style="--rd:.1s"><b>Fair fights</b><span>Only one boss attacks at a time, so every dizzy opening is yours to mash.</span></div>
+        <div class="rule-card reveal" style="--rd:.16s"><b>Pop drops</b><span>Every pop drops a pep pie and a power refill in the middle. Pick one: the other pops away.</span></div>
+        <div class="rule-card reveal" style="--rd:.22s"><b>One More Try</b><span>Out of lives? Jump back in from your last pop. Popped bosses stay popped.</span></div>
+      </div>
+
+      <div class="royale-extras">
+        <div class="extra-card reveal">
+          <h3 class="chunky">Earn crowns</h3>
+          <ul class="chip-row crowns" aria-label="Boss Royale crowns">
+            <li>Royale Clear</li><li>No Lives Lost</li><li>Under Par</li><li>Spicy Clear</li>
+          </ul>
+          <p>Only crowns you earn ever show up. No empty slots. Any kid can enter, all five crew powers start rescued, and quick kid switching is on, until you add spice.</p>
+        </div>
+        <div class="extra-card reveal" style="--rd:.08s">
+          <h3 class="chunky">Add spice</h3>
+          <ul class="chip-row spices" aria-label="Boss Royale spices">
+            <li>Solo Kid <small>No kid switching.</small></li>
+            <li>No Crew <small>No crew powers or power drops.</small></li>
+            <li>One Life <small>One life per try.</small></li>
+            <li>No Second Wind <small>Bosses never soften after a wipe.</small></li>
+            <li>Shuffle <small>The middle bosses come in a new order.</small></li>
+          </ul>
+          <p>Spices open after your first Royale clear and add 1,000 points each. Your best runs land on a local top five by score and by time, right on this device.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#160c1f;"><path fill="#f2f7fa" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ FOR GROWN-UPS ============ -->
+  <section class="sect grownups" id="grownups" aria-labelledby="grownups-h">
+    <div class="wrap">
+      <div class="sect-head reveal">
+        <h2 id="grownups-h">For Grown-Ups</h2>
+        <p class="sub">The plain facts, cob by cob.</p>
+      </div>
+      <p class="grownups-intro reveal">Short version: this is a silly cartoon platformer built from the start to be safe and kind. Here is exactly what it does and does not do.</p>
+      <div class="safety-grid">
+        <div class="safety-item reveal" style="--rd:.03s">
+          <span class="ico" aria-hidden="true">🌐</span>
+          <div><b>Plays in a web browser</b><span>No download, no install, nothing to set up.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.06s">
+          <span class="ico" aria-hidden="true">🚫</span>
+          <div><b>No ads, no purchases</b><span>Nothing to buy, ever. No in-app anything.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.09s">
+          <span class="ico" aria-hidden="true">🔒</span>
+          <div><b>No sign-in, no account</b><span>Progress, settings, and high scores stay in this browser. The game code sends no gameplay analytics.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.12s">
+          <span class="ico" aria-hidden="true">🔌</span>
+          <div><b>No gameplay servers</b><span>No online leaderboard, chat, multiplayer lobby, or child profile. Scores use browser storage on this device.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.15s">
+          <span class="ico" aria-hidden="true">🎈</span>
+          <div><b>Cartoon action only</b><span>Kids bonk cartoon food that pops and hops back up. No blood, no gore, nothing meant to frighten. The villains are goofy: a grumpy butter stick, squabbling shakers.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.18s">
+          <span class="ico" aria-hidden="true">🎯</span>
+          <div><b>Made for ages 8 to 12</b><span>Younger kids are welcome alongside a grown-up.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.21s">
+          <span class="ico" aria-hidden="true">💛</span>
+          <div><b>Forgiving and kind</b><span>Pause anytime during play. A missed jump is never the kid's fault; the game just says “One More Try.”</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.24s">
+          <span class="ico" aria-hidden="true">🎮</span>
+          <div><b>Keyboard, gamepad, or touch</b><span>Controls are simple. Keyboard keys can be remapped.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.27s">
+          <span class="ico" aria-hidden="true">🌙</span>
+          <div><b>Motion and contrast controls</b><span>Reduce motion, high contrast, larger text, and visual sound cues are available in Settings.</span></div>
+        </div>
+        <div class="safety-item reveal" style="--rd:.30s">
+          <span class="ico" aria-hidden="true">🌻</span>
+          <div><b>AI-assisted assets disclosed</b><span>Selected art and audio used generative tools, then received human direction, selection, editing, and review. The game uses no runtime AI.</span></div>
+        </div>
+      </div>
+      <p class="safety-motto reveal">The design rule behind every villain in the game: <i>cute-menace, never cruel.</i></p>
+      <p class="safety-fine reveal">Hosting services may keep ordinary request logs. KILLER CORN itself includes no ads, analytics, or trackers.</p>
+    </div>
+  </section>
+
+  <svg class="divider" viewBox="0 0 1440 58" preserveAspectRatio="none" aria-hidden="true" style="background:#f2f7fa;"><path fill="#ffd75e" d="M0,34 C160,10 300,54 480,40 C660,26 800,6 990,22 C1180,38 1320,20 1440,32 L1440,58 L0,58 Z"/></svg>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="sect finale" aria-labelledby="finale-h">
+    <div class="rays" aria-hidden="true"></div>
+    <div class="wrap">
+      <h2 id="finale-h" class="reveal">The corn will not mash itself.</h2>
+      <div class="hero-cta reveal" style="--rd:.1s">
+        <a class="play-btn" data-play href="/play/">Mash 'Em <span class="tri" aria-hidden="true">▶</span></a>
+      </div>
+      <p class="finale-micro reveal" style="--rd:.18s">Plays right here in your browser. Pick your kid and go.</p>
+      <p class="finale-signoff reveal" style="--rd:.24s">See you in the corn rows.</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p><b>KILLER CORN</b> · A farm-fresh arcade adventure</p>
+  <p><svg class="pancake-mini" aria-hidden="true" focusable="false" viewBox="0 0 200 200"><use href="#pg-stack"/></svg>Published by <b>Pancake Gal</b>.</p>
+  <p>© 2026 Pancake Gal. Free to play. Open-source code under AGPL-3.0-only; art &amp; audio all rights reserved. KILLER CORN™ is a trademark of Pancake Gal.</p>
+  <p><a href="terms.html">Terms of Play</a> · <a href="third-party-notices.txt">Third-Party Notices</a></p>
+  <p class="silly">No snacks were permanently harmed. They all pop right back up.</p>
+</footer>
+
+<a class="play-btn pill-play" data-play href="/play/" aria-label="Play Killer Corn">Mash 'Em <span class="tri" aria-hidden="true">▶</span></a>
+
+<script>
+  // Production game path. The launch host serves the tested build here.
+  const GAME_URL = "/play/";
+
+  document.querySelectorAll("a[data-play]").forEach((a) => { a.href = GAME_URL; });
+
+  const motionOK = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
+
+  // Still mode: one button pauses every looping animation; the choice is remembered when storage works.
+  const stillToggle = document.querySelector(".still-toggle");
+  const setStill = (on) => {
+    document.documentElement.classList.toggle("still", on);
+    stillToggle.setAttribute("aria-pressed", String(on));
+    stillToggle.textContent = on ? "Play page motion" : "Pause page motion";
+    try { localStorage.setItem("killercorn.landing.still", on ? "1" : "0"); } catch {}
+  };
+  if (stillToggle) {
+    stillToggle.hidden = false;
+    let saved = false;
+    try { saved = localStorage.getItem("killercorn.landing.still") === "1"; } catch {}
+    if (saved) setStill(true);
+    stillToggle.addEventListener("click", () => setStill(!document.documentElement.classList.contains("still")));
+  }
+
+  // Floating quick-play pill: show once the hero has scrolled away.
+  const pill = document.querySelector(".pill-play");
+  const hero = document.querySelector(".hero");
+  if (pill && hero && "IntersectionObserver" in window) {
+    new IntersectionObserver((entries) => {
+      pill.classList.toggle("show", !entries[0].isIntersecting);
+    }, { threshold: 0.05 }).observe(hero);
+  }
+
+  // Kernel confetti when hovering the play buttons (skipped for reduced motion).
+  if (motionOK) {
+    document.querySelectorAll(".hero-cta").forEach((zone) => {
+      const btn = zone.querySelector(".play-btn");
+      let last = 0;
+      btn.addEventListener("mouseenter", () => {
+        const now = Date.now();
+        if (now - last < 700) return;
+        last = now;
+        for (let i = 0; i < 14; i++) {
+          const bit = document.createElement("span");
+          bit.className = "confetti-bit";
+          const ang = (Math.PI * 2 * i) / 14 + Math.random() * 0.5;
+          const dist = 70 + Math.random() * 90;
+          bit.style.setProperty("--dx", Math.cos(ang) * dist + "px");
+          bit.style.setProperty("--dy", Math.sin(ang) * dist * 0.8 - 40 + "px");
+          bit.style.setProperty("--rot", Math.floor(Math.random() * 520 - 260) + "deg");
+          zone.appendChild(bit);
+          setTimeout(() => bit.remove(), 900);
+        }
+      });
+    });
+  }
+</script>
+<noscript><style>.reveal, .pop-in { opacity: 1 !important; transform: none !important; }</style></noscript>
+</body>
+</html>

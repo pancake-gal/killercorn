@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en" data-regime="menu">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>KILLER CORN</title>
+    <meta name="description" content="The corn has gone bad. Grab a cob and mash the snacks gone bad." />
+    <meta name="copyright" content="© 2026 Pancake Gal. Code: AGPL-3.0-only. Art &amp; audio: all rights reserved. KILLER CORN™." />
+    <meta name="theme-color" content="#190d24" />
+    <link rel="icon" href="%BASE_URL%assets/icons/favicon.ico" sizes="16x16 32x32 48x48" vite-ignore />
+    <link rel="icon" type="image/png" href="%BASE_URL%assets/icons/favicon-32.png" sizes="32x32" vite-ignore />
+    <link rel="apple-touch-icon" href="%BASE_URL%assets/icons/apple-touch-icon.png" sizes="180x180" vite-ignore />
+    <link rel="manifest" href="%BASE_URL%app.webmanifest" vite-ignore />
+  </head>
+  <body>
+    <!-- Phaser mounts into #game. data-regime on <html> drives --regime-accent (see src/styles/regime.css). -->
+    <div id="game" data-testid="game-root"></div>
+    <!-- React chrome (menus/HUD) mounts into #ui, layered over the canvas (src/ui/chrome). -->
+    <div id="ui" data-testid="ui-root"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
