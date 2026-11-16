@@ -1,5 +1,6 @@
 import { CAMPAIGN } from '@/campaign/definition';
 import type { CampaignSession } from '@/campaign/session';
+import { selectableCharacters } from '@/entities/player/characters';
 import { SCENE } from '@/scenes/keys';
 import { toCampaignChromeState } from './campaignState';
 import { snapshot } from './bus';
@@ -55,10 +56,14 @@ export function publishSavedTitle(saved: CampaignSession | null, titleReady: boo
   });
 }
 
+// A replay starts as the saved kid, or as the kid carried from the last World Map replay when that kid
+// is on the unlocked roster (reward kids need the first clear).
 export function replayCompletedStage(
   scenes: CampaignSceneNavigator,
   session: CampaignSession,
   stageId: string,
+  characterId?: string,
+  campaignVictory = false,
 ): boolean {
   const level = CAMPAIGN.find((candidate) => candidate.id === stageId);
   const titleActive = scenes.isActive(SCENE.title);
@@ -79,11 +84,13 @@ export function replayCompletedStage(
     completed: false,
   });
 
+  const carried = characterId !== undefined && campaignVictory &&
+    selectableCharacters(true).some((kid) => kid.id === characterId);
   if (titleActive) scenes.stop(SCENE.title);
   if (playActive) scenes.stop(SCENE.play);
   scenes.start(SCENE.play, {
     level,
-    session: { ...session, stageId: level.id },
+    session: { ...session, stageId: level.id, ...(carried ? { characterId } : {}) },
     replay: true,
   });
   return true;

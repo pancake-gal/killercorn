@@ -111,7 +111,22 @@ export function royaleNames(ids: readonly string[]): string {
 
 // A field's first objective, shown as it opens (UX review #7): free the caged friend, then the barn.
 export function objectiveText(friend: string): string {
-  return `Free ${friend.charAt(0).toUpperCase()}${friend.slice(1)}, then run to the barn!`;
+  return `Free ${friendName(friend)}, then run to the barn!`;
+}
+
+// A field that cages several friends (The Last Furrow) names the whole job up front.
+export function objectiveAllText(count: number): string {
+  return `Free all ${count} friends, then run to the barn!`;
+}
+
+// The shut barn door on a several-friend field names who is still caged (one or two), or counts them.
+export function lockedDoorFriendsText(caged: readonly string[]): string {
+  if (caged.length > 2) return `${caged.length} friends still caged!`;
+  return `Free ${caged.map(friendName).join(' and ')} first!`;
+}
+
+function friendName(friend: string): string {
+  return `${friend.charAt(0).toUpperCase()}${friend.slice(1)}`;
 }
 
 // The drop-in banner for a group entering the ring.

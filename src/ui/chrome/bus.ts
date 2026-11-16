@@ -39,7 +39,7 @@ export type ChromeIntent =
   | { type: 'retry' }
   | { type: 'next-stage' } // the stage score card's Next button (PlayScene moves on once it may)
   | { type: 'quit-title' }
-  | { type: 'replay-stage'; stageId: string }
+  | { type: 'replay-stage'; stageId: string; characterId?: string } // characterId: the last World Map replay's kid
   | { type: 'start-royale'; characterId: string; spices: RoyaleSpices } // title → a fresh Boss Royale run
   | { type: 'royale-again' }; // the Royale result's Mash Again: a fresh run with the same kid and spices
 

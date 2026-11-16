@@ -3,7 +3,7 @@
 // view synchronously on mount, so a snapshot set before React subscribes is never missed.
 // Player actions go back out as intents (src/main.ts maps them to Phaser-owned transitions).
 
-import { useEffect, useState, useSyncExternalStore } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { intent, snapshot } from './bus';
 import { TitleScreen } from './TitleScreen';
 import { CharacterSelect } from './CharacterSelect';
@@ -66,10 +66,21 @@ export function Chrome() {
   // Boss Royale opens with the first campaign victory (read from the device each title render).
   const royaleUnlocked = view === 'title' && hasCampaignVictory();
   const liveControls = !gameOver && !completed && !autoCredits && !scoreAward && !royaleAward;
-  const replayStage = (stageId: string) => {
+  const mapReplay = useRef(false);
+  const replayKid = useRef<string | undefined>(undefined);
+  const replayStage = (stageId: string, fromMap = false) => {
     setPanel(null);
-    intent.emit({ type: 'replay-stage', stageId });
+    mapReplay.current = fromMap;
+    intent.emit({ type: 'replay-stage', stageId, ...(replayKid.current ? { characterId: replayKid.current } : {}) });
   };
+  useEffect(() => {
+    if (mapReplay.current && view === 'level' && switchCharacterId) replayKid.current = switchCharacterId;
+  }, [view, switchCharacterId]);
+  useEffect(() => {
+    if (!mapReplay.current || view !== 'title' || !titleReady) return;
+    mapReplay.current = false;
+    setPanel('world-map');
+  }, [view, titleReady]);
 
   // Saved only on a player change: an unsaved device keeps following the OS "reduce motion" answer.
   useEffect(() => applySettings(gameSettings), [gameSettings]);
@@ -220,7 +231,7 @@ export function Chrome() {
       {panel === 'world-map' && campaign && (
         <WorldMapPanel
           campaign={campaign}
-          onReplay={replayStage}
+          onReplay={(stageId) => replayStage(stageId, true)}
           onClose={() => setPanel(null)}
         />
       )}

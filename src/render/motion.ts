@@ -1,11 +1,12 @@
 import type { BossState } from '@/entities/boss/kingCorn';
 import type { FinaleKeyframe } from './finale';
 
-// Mercy frames after a hit: a 7.5 Hz blink, or a steady see-through kid under reduced motion.
+// Mercy frames after a hit: a 7.5 Hz blink, or a steady see-through kid under reduced motion. The low
+// end stays at 0.7+ so the kid never melts into busy corn while the player tracks the landing.
 export function invulnAlpha(invuln: number, reduced: boolean): number {
   if (invuln <= 0) return 1;
-  if (reduced) return 0.55;
-  return invuln % 8 < 4 ? 0.45 : 1;
+  if (reduced) return 0.8;
+  return invuln % 8 < 4 ? 0.7 : 1;
 }
 
 // A boss blinks while flashing from a hit and while winding up (the tell); reduced motion holds one

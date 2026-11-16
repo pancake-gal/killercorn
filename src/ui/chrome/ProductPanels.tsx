@@ -103,14 +103,20 @@ function formatScore(score: number | undefined): string | null {
   return score === undefined ? null : score.toLocaleString('en-US');
 }
 
+function cobCount(cobs: number): string {
+  return `${cobs} ${cobs === 1 ? 'cob' : 'cobs'}`;
+}
+
 function characterName(characterId: string): string {
   return CHARACTER_ROSTER.find((character) => character.id === characterId)?.title ?? characterId;
 }
 
 export function ScoreAward({ award, onNext }: { award: ScoreAwardState; onNext: () => void }) {
-  const title = stageTitle(CAMPAIGN.find((level) => level.id === award.stageId)?.titleId, award.stageId);
+  const level = CAMPAIGN.find((candidate) => candidate.id === award.stageId);
+  const title = stageTitle(level?.titleId, award.stageId);
   const goals = stageReplayGoals({
     stageId: award.stageId,
+    boss: !!(level?.boss || level?.teamBoss),
     cobs: award.cobs,
     totalCobs: award.totalCobs,
     flawless: award.breakdown.flawless > 0,
@@ -132,7 +138,7 @@ export function ScoreAward({ award, onNext }: { award: ScoreAwardState; onNext: 
           <div><dt>Clean</dt><dd>{formatScore(award.breakdown.flawless)}</dd></div>
           <div><dt>Pace</dt><dd>{formatScore(award.breakdown.pace)}</dd></div>
         </dl>
-        <small>{clearTime(award.frames)} · {award.cobs} {award.cobs === 1 ? 'cob' : 'cobs'}</small>
+        <small>{clearTime(award.frames)} · {cobCount(award.cobs)}</small>
         <ul className="score-replay-goals" aria-label="Friendly replay goals">
           {goals.map((goal) => (
             <li key={goal.id} data-achieved={goal.achieved}>
@@ -166,7 +172,7 @@ function HighScoreRows({ entries, game }: { entries: (LevelScoreEntry | GameScor
               <td>#{index + 1}</td>
               <td>{characterName(entry.characterId)}</td>
               <td>{formatScore(entry.score)}</td>
-              <td>{clearTime(entry.frames)}<small>{game ? `${(entry as GameScoreEntry).stages} stages` : `${(entry as LevelScoreEntry).cobs} cobs`}</small></td>
+              <td>{clearTime(entry.frames)}<small>{game ? `${(entry as GameScoreEntry).stages} stages` : cobCount((entry as LevelScoreEntry).cobs)}</small></td>
             </tr>
           ))}
         </tbody>
@@ -175,25 +181,35 @@ function HighScoreRows({ entries, game }: { entries: (LevelScoreEntry | GameScor
   );
 }
 
-// The High Scores rows for a Boss Royale board (score or time order).
-function RoyaleBoardRows({ entries }: { entries: readonly RoyaleScoreEntry[] }) {
+// The High Scores rows for a Boss Royale board (score or time order). The ranked measure takes the
+// emphasized third column, so the time board leads with the time to beat.
+function RoyaleBoardRows({ entries, byTime }: { entries: readonly RoyaleScoreEntry[]; byTime: boolean }) {
   if (entries.length === 0) return <p className="high-score-empty">{ROYALE_COPY.emptyBoard}</p>;
   return (
     <div className="high-score-table-wrap">
       <table className="high-score-table">
-        <thead><tr><th>Rank</th><th>Kid</th><th>Score</th><th>Clear</th></tr></thead>
+        <thead><tr><th>Rank</th><th>Kid</th>{byTime ? <><th>Time</th><th>Score</th></> : <><th>Score</th><th>Clear</th></>}</tr></thead>
         <tbody>
-          {entries.map((entry, index) => (
-            <tr key={`${entry.score}-${entry.frames}-${entry.characterId}-${index}`}>
-              <td>#{index + 1}</td>
-              <td>{characterName(entry.characterId)}</td>
-              <td>{formatScore(entry.score)}</td>
-              <td>
-                {clearTime(entry.frames)}
-                <small>{entry.kids.length} {entry.kids.length === 1 ? 'kid' : 'kids'} · {entry.spices} {entry.spices === 1 ? 'spice' : 'spices'}</small>
-              </td>
-            </tr>
-          ))}
+          {entries.map((entry, index) => {
+            const detail = <small>{entry.kids.length} {entry.kids.length === 1 ? 'kid' : 'kids'} · {entry.spices} {entry.spices === 1 ? 'spice' : 'spices'}</small>;
+            return (
+              <tr key={`${entry.score}-${entry.frames}-${entry.characterId}-${index}`}>
+                <td>#{index + 1}</td>
+                <td>{characterName(entry.characterId)}</td>
+                {byTime ? (
+                  <>
+                    <td>{clearTime(entry.frames)}</td>
+                    <td>{formatScore(entry.score)}{detail}</td>
+                  </>
+                ) : (
+                  <>
+                    <td>{formatScore(entry.score)}</td>
+                    <td>{clearTime(entry.frames)}{detail}</td>
+                  </>
+                )}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -226,7 +242,7 @@ export function HighScoresPanel({ onClose }: CloseableProps) {
         </label>
         <h3>{royaleBoard ?? (list === 'game' ? 'Full Game' : stageTitle(level?.titleId, list))}</h3>
         {royaleBoard
-          ? <RoyaleBoardRows entries={list === 'royale-time' ? royale.times : royale.scores} />
+          ? <RoyaleBoardRows entries={list === 'royale-time' ? royale.times : royale.scores} byTime={list === 'royale-time'} />
           : <HighScoreRows entries={entries} game={list === 'game'} />}
         <button type="button" className="btn-primary" data-gamepad-back="true" onClick={onClose}>Done</button>
       </section>
@@ -315,7 +331,7 @@ export function WorldMapPanel({ campaign, onReplay, onClose }: {
                             {title}
                             {stageIndex === 2 && <em className="world-map-boss-stamp">Boss mashed</em>}
                             {(bestTime || bestCobs !== undefined || bestScore) && (
-                              <small>{bestScore ? `${bestScore} pts · ` : ''}Best {bestTime ?? '—'} · {bestCobs ?? 0} cobs</small>
+                              <small>{bestScore ? `${bestScore} pts · ` : ''}Best {bestTime ?? '—'} · {cobCount(bestCobs ?? 0)}</small>
                             )}
                           </button>
                         ) : (

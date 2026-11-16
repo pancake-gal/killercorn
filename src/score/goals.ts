@@ -1,5 +1,6 @@
 export interface StageReplayGoalInput {
   stageId: string;
+  boss: boolean; // a boss arena (the level def has a boss or a team boss)
   cobs: number;
   totalCobs: number;
   flawless: boolean;
@@ -19,14 +20,13 @@ const ROUTE_CHALLENGES: Record<string, string> = {
   '4': 'cross the slick boards',
   '5': 'bank a peel shot',
   last: 'chain two crew shortcuts',
-  grab: 'answer every recovery',
-  final: 'answer every recovery',
+  boss: 'answer every recovery',
 };
 
-function routeChallenge(stageId: string): string {
-  if (stageId.startsWith('end-final')) return ROUTE_CHALLENGES.final;
-  if (stageId.startsWith('end-grab')) return ROUTE_CHALLENGES.grab;
-  if (stageId.startsWith('last-')) return ROUTE_CHALLENGES.last;
+// Every boss fight shares the boss goal; fields key by world digit ('1-boss' is King Corn, not a field).
+function routeChallenge(stageId: string, boss: boolean): string {
+  if (boss) return ROUTE_CHALLENGES.boss;
+  if (stageId.startsWith('end-furrow')) return ROUTE_CHALLENGES.last;
   return ROUTE_CHALLENGES[stageId.charAt(0)] ?? 'find a fresh route';
 }
 
@@ -51,7 +51,7 @@ export function stageReplayGoals(input: StageReplayGoalInput): StageReplayGoal[]
     },
     {
       id: 'route',
-      label: `Route challenge: ${routeChallenge(input.stageId)}`,
+      label: `Route challenge: ${routeChallenge(input.stageId, input.boss)}`,
       achieved: false,
     },
     {

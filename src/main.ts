@@ -131,7 +131,7 @@ intent.on((i) => {
   }
   if (i.type === 'replay-stage') {
     const session = loadCampaign();
-    if (session) replayCompletedStage(game.scene, session, i.stageId);
+    if (session) replayCompletedStage(game.scene, session, i.stageId, i.characterId, hasCampaignVictory());
   }
 });
 

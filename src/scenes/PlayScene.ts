@@ -37,10 +37,12 @@ import { anyBossRecovering, bossOpen, bossTellsForTransition, throwCueText, type
 import { bossBlinkAlpha, calmFinaleKeyframe, hurtFlashFill, invulnAlpha, rageLook } from '@/render/motion';
 import {
   bossWindupLook,
+  crewChipY,
   hitStopFor,
   kidDisplayScale,
   koPhase,
   latchPresses,
+  lockedDoorText,
   lockedDoorTouched,
   objectiveCue,
   mergeLatched,
@@ -129,11 +131,8 @@ const HURT_POSE_FRAMES = 14; // hold the hurt pose (item 5) after a hit
 const JUICE_FRAMES = 6; // player squash / stretch latch length
 const ENEMY_SQUISH_FRAMES = 8; // scaleY x0.5 KO pop on a felled enemy
 const VICTIM_FLASH_FRAMES = 2; // a felled enemy flashes the regime glow this long (UX review #10)
-// The stage score card (UX review #9): a beat before it covers the pop, a minimum before a press counts,
-// and the point it moves on by itself.
 const ENDING_HOLD_MS = 1_100;
 const CARD_MIN_MS = 1_500;
-const CARD_AUTO_MS = 6_000;
 // The game-over card waits for the tumble to read before covering it.
 const GAME_OVER_HOLD_MS = 900;
 // Crew-power ghost trail: drop a fading copy of the hero every few frames for a short window.
@@ -214,7 +213,7 @@ export class PlayScene extends Phaser.Scene {
   private royaleNextText: Phaser.GameObjects.Text | undefined; // "Next up:" readout
   private royaleDropSprites: Phaser.GameObjects.Sprite[] = []; // [health pie, power box]
   private teamCfgs: BossConfig[] = []; // each team member's config, for the frame-delta mappers
-  private chipY = 80; // the crew-power chip's row (lower in the ring, under two boss rows)
+  private chipY = 80; // the crew-power chip's row (lower with a team boss, under its two health rows)
   private gamepadPauseHeld = false;
   private gamepadSwitchLeftHeld = false;
   private gamepadSwitchRightHeld = false;
@@ -615,7 +614,7 @@ export class PlayScene extends Phaser.Scene {
     this.teamCfgs = this.art.teamBoss?.members.map((m) => m.config) ?? [];
     // Earlier attempts' pops never show; a pop this attempt restarts its clock.
     this.royalePopAge = this.world.teamBoss?.members.map(() => Infinity) ?? [];
-    this.chipY = this.level.teamBoss?.royale ? 100 : 80;
+    this.chipY = crewChipY(this.level);
 
     // Audio: a presentation-only bus (reads state, never writes the sim). Start the bed for this
     // arena — the boss romp in an arena, the bouncy farm theme otherwise. On a scene restart the
@@ -1540,8 +1539,9 @@ export class PlayScene extends Phaser.Scene {
 
   private quitToTitle(): void {
     this.audio.stopMusic();
-    // A royale session is synthetic: the title gets the real saved campaign (or none) back.
-    if (this.royale) publishSavedTitle(loadCampaign(), false);
+    // A royale or replay session is a copy that never saves: the title gets the real saved campaign
+    // (or none) back, so the World Map keeps the true current stage after a replay.
+    if (this.royale || this.replayMode) publishSavedTitle(loadCampaign(), false);
     else publishCampaignTitle(this.session, false);
     this.scene.start(SCENE.title);
   }
@@ -1675,7 +1675,7 @@ export class PlayScene extends Phaser.Scene {
     }
     // A barn door touched with a friend still caged says why it stays shut (UX review #7).
     if (lockedDoorTouched(previous, this.world, this.level, this.cfg.player)) {
-      snapshot.set({ ...snapshot.get(), visualCue: { id: this.world.frame, text: STRINGS.lockedDoor } });
+      snapshot.set({ ...snapshot.get(), visualCue: { id: this.world.frame, text: lockedDoorText(this.world.allies) } });
     }
     // "Hit it now" must not outlive the opening: drop it the frame the boss stops recovering.
     if (snapshot.get().visualCue?.text === STRINGS.bossOpen && !anyBossRecovering(this.world)) {
@@ -2099,7 +2099,7 @@ export class PlayScene extends Phaser.Scene {
 
   // The stage score card (UX review #9): hold a beat so the pop or the door touch lands, then show the
   // card and wait for the player (a Next press, or a fresh jump/swing) instead of rushing on after ~2 s.
-  // A press in the first CARD_MIN_MS is ignored; after CARD_AUTO_MS the card moves on by itself.
+  // A press in the first CARD_MIN_MS is ignored; the card then waits as long as the player needs.
   private holdScoreCard(award: import('@/ui/chrome/bus').ScoreAwardState, proceed: () => void): void {
     this.time.delayedCall(ENDING_HOLD_MS, () => {
       this.publishCampaign({ scoreAward: award });
@@ -2112,7 +2112,6 @@ export class PlayScene extends Phaser.Scene {
         this.advanceStage = undefined;
         proceed();
       };
-      this.time.delayedCall(CARD_AUTO_MS, () => this.advanceStage?.());
     });
   }
 

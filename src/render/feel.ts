@@ -3,13 +3,20 @@ import type { InputFrame } from '@/core/replay';
 import type { WorldState } from '@/entities/level/run';
 import type { PlayerConfig } from '@/entities/player/player';
 import { aabbOverlap, type LevelDef } from '@/entities/level/level';
-import { objectiveText } from '@/content/strings';
+import type { AllyState } from '@/entities/ally/produce';
+import { STRINGS, lockedDoorFriendsText, objectiveAllText, objectiveText } from '@/content/strings';
 import type { FxEvent } from './fx';
 
 // A field with a caged friend opens on its objective (UX review #7); other stages say nothing.
 export function objectiveCue(level: LevelDef): string | undefined {
-  const friend = level.allies?.[0];
-  return friend && level.goal ? objectiveText(friend.name) : undefined;
+  const allies = level.allies ?? [];
+  if (!allies[0] || !level.goal) return undefined;
+  return allies.length > 1 ? objectiveAllText(allies.length) : objectiveText(allies[0].name);
+}
+
+export function lockedDoorText(allies: readonly AllyState[]): string {
+  if (allies.length <= 1) return STRINGS.lockedDoor;
+  return lockedDoorFriendsText(allies.filter((ally) => !ally.freed).map((ally) => ally.name));
 }
 
 // The kid just touched the barn door while a friend is still caged — say why it stays shut. Fires on
@@ -18,6 +25,12 @@ export function lockedDoorTouched(prev: WorldState, curr: WorldState, level: Lev
   if (!level.goal || curr.allies.every((ally) => ally.freed)) return false;
   const touching = (w: WorldState) => aabbOverlap({ x: w.player.x, y: w.player.y, w: pCfg.width, h: pCfg.height }, level.goal!);
   return touching(curr) && !touching(prev);
+}
+
+// The crew-power chip's top edge. A team boss (Salt & Pepper, the Royale ring) shows two health rows
+// (y 52 and 72, 14 px tall), so the chip drops below both instead of covering the second.
+export function crewChipY(level: LevelDef): number {
+  return level.teamBoss ? 100 : 80;
 }
 
 // A kill or a boss hit freezes the action this many frames (UX review #10). The scene skips its sim
